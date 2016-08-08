@@ -1,0 +1,45 @@
+#pragma once
+#ifndef _NETMANAGE_H
+#define _NETMANAGE_H
+
+#include "_NetManager_IP"
+#include "_NetManager_Link"
+
+namespace Net
+{
+	typedef struct OSI7_Layer2_DataLink
+	{
+		MACInfo		MDst;
+		MACInfo		MSrc;
+	} L2;
+	typedef struct OSI7_Layer3_Network
+	{
+		MACInfo		MDst;
+		MACInfo		MSrc;
+		IPInfo			ISrc;
+		IPInfo			IDst;
+	}L3;
+	typedef struct OSI7_Layer4_Network
+	{
+		MACInfo		MDst;
+		MACInfo		MSrc;
+		IPInfo			ISrc;
+		IPInfo			IDst;
+	}L4;
+
+	class Utility
+	{
+	public:
+		static byte AddrBuf[20];
+
+	public:
+		static IP_ADAPTER_INFO* GetNetworkAdaptersInfo();
+		static void GetMACAddress(Net::MACInfo&);
+		static void GetIPAddress(Net::IPInfo&);
+		static void GetGatewayIPAddress(Net::IPInfo&);
+
+		static bool RecoveryPeriod(unsigned __int32);
+	};
+}
+
+#endif /* _NETMANAGE_H */

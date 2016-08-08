@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;tpp</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="TanguSpoof.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TanguAnalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_PacketField.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tangu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_NetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TanguBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="_PacketField_ARP">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField_Ethernet">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField_IP">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TanguAnalyzer">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TanguSpoof">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_NetManager_IP">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_NetManager_Link">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField_ICMP">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TanguPing">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField_TCP">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_WinDivert">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TanguBlocker">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_NetManager">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_PacketField">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="_TanguBuild">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,139 @@
+#pragma once
+#ifndef _PACKETFIELD_ICMP
+#define _PACKETFIELD_ICMP
+
+#include "_PacketField_Ethernet"
+#include "_PacketField_IP"
+
+#include <Random>
+using _STD random_device;
+using _STD mt19937;
+using _STD uniform_int_distribution;
+
+#pragma pack(push, 1)
+typedef struct ICMPArchitecture
+{
+	enum class ICMPType
+	{
+		ICMP_ECHO_REPLY = 0,
+		ICMP_TIME_EXCEEDED = 1,
+		ICMP_DEST_UNREACH =  3,
+		ICMP_SOURCE_QUENCH = 4,
+		ICMP_REDIRECT = 5,
+		ICMP_ECHO = 8,
+		ICMP_PARAMETERPROB = 12,
+		ICMP_TIMESTAMP = 13,
+		ICMP_TIMESTAMPREPLY = 14,
+		ICMP_INFO_REQUEST = 15,
+		ICMP_INFO_REPLY = 16,
+		ICMP_ADDRESS = 17,
+		ICMP_ADDRESSREPLY = 18,
+		NR_ICMP_TYPES = 19
+	};
+	unsigned __int8		Type;		
+	unsigned __int8		Code;		/* Sub Type */
+	unsigned __int16		Checksum;
+
+	unsigned __int16		Identifier;
+	unsigned __int16		Sequence;
+
+	byte						Data[32];
+} ICMPArch;
+#pragma pack(pop)
+
+namespace Packet
+{
+	__forceinline unsigned __int16 ICMPCheckSum(IPHeader* UchkdIP, ICMPArch* UchkdICMP)
+	{
+		unsigned __int32 Sum{ 0 };
+		UchkdICMP->Checksum = 0;
+		UchkdIP->Checksum = 0;
+
+		unsigned __int16* Short{ (unsigned __int16*)UchkdICMP };
+		for (__int32 i = 0; i < sizeof(*UchkdICMP) / 2; i++)
+		{
+			Sum += *(Short + i);
+		}
+
+		Sum += (UchkdIP->SrcIP[0] << 8) + UchkdIP->SrcIP[1] + (UchkdIP->SrcIP[2] << 8) + UchkdIP->SrcIP[3];
+		Sum += (UchkdIP->DestIP[0] << 8) + UchkdIP->DestIP[1] + (UchkdIP->DestIP[2] << 8) + UchkdIP->DestIP[3];
+		Sum += UchkdIP->Protocol + sizeof(ICMPArch);
+
+		Sum = ((Sum & 0xFFFF0000) >> 16) + (Sum & 0x0000FFFF);
+		Sum += (Sum & 0xFFFF0000) >> 16;
+		Sum = ~Sum & 0x0000FFFF;
+
+		return static_cast<unsigned __int16>(Sum);
+	}
+}
+
+typedef class __ICMP
+{
+private:
+	random_device					RdFromHW;
+	/* A Mersenne Twister pseudo-random generator of 32-bit numbers with a state size of 19937 bits. */
+	mt19937							Seed;
+	uniform_int_distribution<> Distributer;
+	
+public:
+	EthernetHeader		_EthHead;
+	IPHeader				_IPHead;
+	ICMPArch				_ICMP;
+
+	byte					_Msg[_MAX_ETHERNETLEN];
+	Net::L3				_Rsrc;
+	unsigned __int16	_Iden;
+	unsigned __int16	_Seq;
+
+public:
+	__ICMP::__ICMP() : 
+		Seed{RdFromHW()}, Distributer{0, 0xFF00}
+	{
+		Net::Utility::GetMACAddress(_Rsrc.MSrc);
+		Net::Utility::GetIPAddress(_Rsrc.ISrc);
+
+		_Iden = static_cast<unsigned __int16>(Distributer(Seed));
+		_Seq = static_cast<unsigned __int16>(Distributer(Seed));
+	}
+
+private:
+	unsigned __int16 __ICMP::CheckSum()
+	{
+		_IPHead.Checksum;
+	}
+
+public:
+	void __ICMP::GetICMP(ICMPArchitecture::ICMPType ControlMessage)
+	{
+		/* L2 { Data Link Layer } : Ethernet */
+		memcpy(_EthHead.Destination, *this->_Rsrc.MDst, SIZ_HARDWARE);
+		memcpy(_EthHead.Source, *this->_Rsrc.MSrc, SIZ_HARDWARE);
+		_EthHead.Type = htons(UCast(16)(EthernetHeader::EthernetType::IPV4));
+		
+		/* L3 { Network Layer } : IP */ 
+		_IPHead.IHL = IP_VERSION(IPPROTO_IPV4) | IP_HEADER_LENGTH(20);
+		_IPHead.ServiceType = DSCP_CS_N(0) | ECN(0);
+		_IPHead.TotalLength = htons(60);
+		_IPHead.ldentification = htons(_Iden++);
+		_IPHead.Fragmention = htons(IP_FLAG(DONT_FRAGMENTS(0) | MORE_FRAGMENTS(0)));
+		_IPHead.Protocol = UCast(8)(IPHeader::IPProto::ICMP);
+		_IPHead.TTL = 128;
+		memcpy(_IPHead.SrcIP, &_Rsrc.ISrc, SIZ_PROTOCOL);
+		memcpy(_IPHead.DestIP, &_Rsrc.IDst, SIZ_PROTOCOL);
+		_IPHead.Checksum = htons(Packet::IPCheckSum(&_IPHead));
+
+		/* L3 { Network Layer } : ICMP */
+		_ICMP.Type = UCast(8)(ControlMessage);
+		_ICMP.Code = 0;
+		_ICMP.Identifier = htons(1);
+		_ICMP.Sequence = htons(_Seq++);
+		memcpy(_ICMP.Data, "abcdefghijkmnopqrstuvwabcdefghi", sizeof(_ICMP.Data));
+		_ICMP.Checksum = htons(Packet::ICMPCheckSum(&_IPHead, &_ICMP));
+
+		memcpy(_Msg, &_EthHead, sizeof(EthernetHeader));
+		memcpy(_Msg + sizeof(EthernetHeader), &_IPHead, sizeof(IPHeader));
+		memcpy(_Msg + sizeof(EthernetHeader) + sizeof(IPHeader), &_ICMP, sizeof(ICMPArch));
+	}
+} ICMP;
+
+#endif /* _PACKETFIELD_ICMP */
