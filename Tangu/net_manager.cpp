@@ -3,7 +3,7 @@
 
 namespace Net /* _NetManager_H # class Utility*/
 {
-	BYTE Utility::BufferForAddress[20];
+	BYTE Utility::BufferForAddress[20] = { 0 };
 
 	bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO IPAdapterInfo)
 	{
@@ -16,12 +16,22 @@ namespace Net /* _NetManager_H # class Utility*/
 			return false;
 		}
 
-		return HostIP.Mask(HostSubnetMask) == GatewayIP.Mask(HostSubnetMask) 
+		return HostIP.Mask(HostSubnetMask) == GatewayIP.Mask(HostSubnetMask)
 			? true : false;
 	}
 	bool _cdecl CompareDescription(PIP_ADAPTER_INFO IPAdapterInfo)
 	{
-		if (nullptr != strstr(IPAdapterInfo->Description, "Qualcomm"))
+		if (nullptr != strstr(IPAdapterInfo->Description, "Wireless"))
+		{
+			return true;
+		}
+		return false;
+	}
+	bool _cdecl CompareARP(PMIB_IPNETROW IPNetRow)
+	{
+		Net::PIPAdapterInfo GatewayAddressInfo = Net::IPAdapterInfo::GetInstance();
+		if (Net::Utility::GetGatewayIPAddress(GatewayAddressInfo)
+			== Net::IPInfo(ntohl(IPNetRow->dwAddr)))
 		{
 			return true;
 		}
@@ -65,7 +75,7 @@ namespace Net /* _NetManager_H # class Utility*/
 
 	IPAdapterInfo::~IPAdapterInfo(void)
 	{
-		
+
 	}
 
 	PIP_ADAPTER_INFO IPAdapterInfo::operator()(void)
@@ -81,33 +91,93 @@ namespace Net /* _NetManager_H # class Utility*/
 			IsValidResourcesOrNot = FuncCompare(AdapterInfo);
 			if (false != IsValidResourcesOrNot)
 			{
-				printf("good\n");
 				break;
 			}
 
-			printf("no\n");
 			AdapterInfo = AdapterInfo->Next;
 		}
 
 		return AdapterInfo;
 	}
 
+	IPNetTableInfo* IPNetTableInfo::SingleIPNetTableInfo = nullptr;
+	IPNetTableInfo* IPNetTableInfo::GetInstance(void)
+	{
+		if (nullptr == SingleIPNetTableInfo)
+		{
+			SingleIPNetTableInfo = new IPNetTableInfo;
+		}
+		return SingleIPNetTableInfo;
+	}
 
-	MACInfo Utility::GetMACAddress(Net::IPAdapterInfo* AdaptersInfo)
+	IPNetTableInfo::IPNetTableInfo(void)
+		: IpNetTable(nullptr), IsRowCorrespond(false)
+	{
+		while (ERROR_INSUFFICIENT_BUFFER == (Status = GetIpNetTable((MIB_IPNETTABLE*)IpNetTable,
+			&SizeOfPointer,
+			TRUE)))
+		{
+			delete[] IpNetTable;
+			IpNetTable = new char[SizeOfPointer];
+			Status = GetIpNetTable((MIB_IPNETTABLE*)IpNetTable,
+				&SizeOfPointer,
+				TRUE);
+		}
+	}
+	IPNetTableInfo::~IPNetTableInfo(void)
+	{
+
+	}
+
+	PMIB_IPNETROW IPNetTableInfo::operator()(void)
+	{
+		return Row;
+	}
+	PMIB_IPNETROW IPNetTableInfo::GetNode(bool(_cdecl *FuncCompare)(PMIB_IPNETROW))
+	{
+		Table = (PMIB_IPNETTABLE)IpNetTable;
+		if (IsRowCorrespond)
+		{
+			return Row = &(Table->table[Index]);
+		}
+
+		for (INT i = 0; i != Table->dwNumEntries; ++i)
+		{
+			Row = &(Table->table[i]);
+
+			if (CompareARP(Row))
+			{
+				IsRowCorrespond = true;
+				Index = i;
+				return Row;
+			}
+		}
+		return nullptr;
+	}
+
+
+	MACInfo Utility::GetMACAddress(Net::PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
 		return nullptr != IpAdapterInfoNode ?
 			MACInfo(IpAdapterInfoNode->Address) :
 			MACInfo();
 	}
-	IPInfo Utility::GetIPAddress(Net::IPAdapterInfo* AdaptersInfo)
+	MACInfo Utility::GetGatewayMACAddress(Net::PIPNetTableInfo NetTableInfo)
+	{
+		PMIB_IPNETROW IpNetRowInfo = NetTableInfo->GetNode(Net::CompareARP);
+		return nullptr != IpNetRowInfo ?
+			MACInfo(IpNetRowInfo->bPhysAddr) :
+			MACInfo();
+	}
+	IPInfo Utility::GetIPAddress(Net::PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
-		return nullptr != IpAdapterInfoNode ? 
+		return nullptr != IpAdapterInfoNode ?
 			IPInfo(IpAdapterInfoNode->IpAddressList.IpAddress.String) :
 			IPInfo();
 	}
-	IPInfo Utility::GetGatewayIPAddress(Net::IPAdapterInfo* AdaptersInfo)
+	IPInfo Utility::GetGatewayIPAddress(Net::PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
 		return nullptr != IpAdapterInfoNode ?
@@ -164,7 +234,18 @@ namespace Net /* _NetManager_IP # class IPInfo */
 		memcpy(this->_bIP, IP._bIP, 4);
 		_sIP = IP._sIP;
 	}
-	const IPInfo& IPInfo::operator=(const byte* IPByte)
+	IPInfo::IPInfo(const DWORD dwIP)
+	{
+		DWORD FullIntegerIP = dwIP;
+		BYTE DividedAddressWithCharType[4];
+		DividedAddressWithCharType[0] = (BYTE)((FullIntegerIP & 0xFF000000) >> 24);
+		DividedAddressWithCharType[1] = (BYTE)((FullIntegerIP & 0x00FF0000) >> 16);
+		DividedAddressWithCharType[2] = (BYTE)((FullIntegerIP & 0x0000FF00) >> 8);
+		DividedAddressWithCharType[3] = (BYTE)(FullIntegerIP & 0x000000FF);
+
+		*this = (IPInfo)DividedAddressWithCharType;
+	}
+	const IPInfo& IPInfo::operator=(const BYTE* IPByte)
 	{
 		memcpy(_bIP, IPByte, 4);
 
@@ -188,13 +269,18 @@ namespace Net /* _NetManager_IP # class IPInfo */
 
 		return *this;
 	}
+	const IPInfo& IPInfo::operator=(const DWORD dwIP)
+	{
+		*this = IPInfo(dwIP);
+		return *this;
+	}
 
 	byte* IPInfo::operator*(void)
 	{
 		return _bIP;
 	}
-	
-	byte IPInfo::operator[](size_t Octet)
+
+	byte IPInfo::operator[](SIZE_T Octet)
 	{
 		return (Octet > 4 || Octet < 1) ? _bIP[Octet] : 0;
 	}
@@ -228,7 +314,7 @@ namespace Net /* _NetManager_Link # class MACInfo */
 		UINT Pos{ 0 };
 		while (Pos < 6)
 		{
-			Buf[Pos++] = (BYTE) strtoul(MACString, nullptr, 16);
+			Buf[Pos++] = (BYTE)strtoul(MACString, nullptr, 16);
 			MACString = strchr(MACString, '-') + 1;
 		}
 	}

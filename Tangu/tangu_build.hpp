@@ -78,11 +78,11 @@ To create an application that uses wpcap.dll with Microsoft Visual C++, follow t
 	•Set the options of the linker to include the winsock library file ws2_32.lib. This file is distributed with the C compiler and contains the socket functions for Windows. It is needed by some functions used by the samples in the tutorial.
 */
 
+#define HAVE_REMOTE
 #include <pcap.h>
 #include <wpcapi.h>
 #pragma comment(lib, "wpcap.lib")
 
-#define HAVE_REMOTE
 #define DUMP_LENGTH 0x00000800
 
 #define SIZ_HARDWARE 6

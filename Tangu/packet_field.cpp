@@ -3,9 +3,6 @@
 
 namespace Packet /* _PacketField_H # class Utility */
 {
-	CHAR Utility::_Buf[0x20] = { 0 };
-	DWORD Utility::_Dec = 0;
-
 	UINT Utility::Trace(const BYTE* Data, UINT Length)
 	{
 		if (Length > sizeof(long))
@@ -14,14 +11,15 @@ namespace Packet /* _PacketField_H # class Utility */
 		}
 		else
 		{
-			_Dec = 0;
+			CHAR Buf[0x20] = { 0 };
+			DWORD Dec = 0;
 			for (int Byte = Length - 1; Byte >= 0; --Byte)
 			{
-				sprintf_s(_Buf, "%i", Data[Length - Byte - 1]);
-				_Dec += (atoi(_Buf) << (Byte * CHAR_BIT));
+				sprintf_s(Buf, "%i", Data[Length - Byte - 1]);
+				Dec += (atoi(Buf) << (Byte * CHAR_BIT));
 			}
 
-			return _Dec;
+			return Dec;
 		}
 	}
 
@@ -113,8 +111,8 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		_Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
 		_Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
 
-		_Iden = static_cast<unsigned __int16>(Distributer(Seed));
-		_Seq = static_cast<unsigned __int16>(Distributer(Seed));
+		_Iden = static_cast<USHORT>(Distributer(Seed));
+		_Seq = static_cast<USHORT>(Distributer(Seed));
 	}
 
 	USHORT __ICMP::CheckSum(void)

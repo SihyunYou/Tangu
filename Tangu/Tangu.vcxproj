@@ -153,9 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="tangu_analyzer.cpp" />
-    <ClCompile Include="tangu_block.cpp" />
-    <ClCompile Include="tangu_spoof.cpp" />
+    <ClCompile Include="tangu_entry.cpp" />
     <ClCompile Include="net_manager.cpp" />
     <ClCompile Include="packet_field.cpp" />
     <ClCompile Include="tangu.cpp" />
@@ -163,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="tangu_analyzer.hpp" />
     <ClInclude Include="tangu_blocker.hpp" />
+    <ClInclude Include="tangu_interface.hpp" />
     <ClInclude Include="tangu_ping.hpp" />
     <ClInclude Include="tangu_spoof.hpp" />
     <ClInclude Include="net_manager.hpp" />

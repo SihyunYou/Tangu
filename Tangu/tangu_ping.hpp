@@ -14,14 +14,12 @@ public:
 		: NetInfo(Interface)
 	{
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
+		Net::PIPNetTableInfo NetTableInfo = Net::IPNetTableInfo::GetInstance();
 
+		_ICMPPacket._Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
 		_ICMPPacket._Rsrc.IDst = Target;
-		_ARPFrame._Rsrc.ISrc = _ICMPPacket._Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
-		_ARPFrame._Rsrc.MSrc = _ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
-
-		_ARPFrame._Rsrc.IDst = Net::Utility::GetGatewayIPAddress(AddressInfo);
-		_ARPFrame._Rsrc.MDst = "FF-FF-FF-FF-FF-FF";
-		_ICMPPacket._Rsrc.MDst = _ARPFrame._Rsrc.MDst = GetMACAddress(_ARPFrame._Rsrc.IDst, 30.0).Source;
+		_ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
+		_ICMPPacket._Rsrc.MDst = Net::Utility::GetGatewayMACAddress(NetTableInfo);
 	}
 	void PacketGrouper::Ping(Packet::ICMP_ARCH::ICMPType Type)
 	{

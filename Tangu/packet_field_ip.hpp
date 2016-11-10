@@ -28,7 +28,7 @@ typedef struct _IP_HEADER
 #define	ECN(x)						(x & 0x02)
 	UCHAR ServiceType;
 
-	UCHAR TotalLength;
+	USHORT TotalLength;
 	USHORT ldentification;
 
 	// Fragment Identifier Field

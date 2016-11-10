@@ -24,20 +24,11 @@
     <ClCompile Include="tangu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tangu_analyzer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tangu_block.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tangu_spoof.cpp">
+    <ClCompile Include="tangu_entry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="_PacketField">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="net_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="packet_field.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_interface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

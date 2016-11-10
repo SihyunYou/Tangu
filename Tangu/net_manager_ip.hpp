@@ -20,13 +20,15 @@ namespace Net
 		IPInfo::IPInfo(const BYTE* IPByte);
 		IPInfo::IPInfo(const string& IPString);
 		IPInfo::IPInfo(const IPInfo& IP);
-		const IPInfo& IPInfo::operator=(const byte* IPByte);
+		IPInfo::IPInfo(const DWORD dwIP);
+		const IPInfo& IPInfo::operator=(const BYTE* IPByte);
 		const IPInfo& IPInfo::operator=(const string& IPString);
 		const IPInfo& IPInfo::operator=(const IPInfo& IP);
+		const IPInfo& IPInfo::operator=(const DWORD dwIP);
 
 	public:
 		BYTE* IPInfo::operator*(void);
-		BYTE IPInfo::operator[](size_t Octet);
+		BYTE IPInfo::operator[](SIZE_T Octet);
 		bool IPInfo::operator==(IPInfo&);
 
 		string IPInfo::uc_bstr(void);

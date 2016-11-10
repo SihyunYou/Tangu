@@ -13,10 +13,6 @@ namespace Packet
 	class Utility
 	{
 	public:
-		static CHAR						_Buf[0x20];
-		static DWORD					_Dec;
-
-	public:
 		static UINT Utility::Trace(const BYTE*, UINT);
 		static void Utility::CustomPermutate(string&, const CHAR*, ...);
 	};
