@@ -5,59 +5,70 @@
 
 using namespace std;
 
-#include "TanguSpoof"
-#include "TanguPing"
-#include "TanguBlocker"
+#include "tangu_spoof.hpp"
+#include "tangu_ping.hpp"
+#include "tangu_blocker.hpp"
+
+typedef pcap_if PCAP_INTERFACE;
+typedef pcap_if* PPCAP_INTERFACE;
+typedef pcap_t PCAP;
+typedef pcap_t* PPCAP;
+
+class JyPcap
+{
+private:
+	PPCAP_INTERFACE FirstDevice;
+	PPCAP_INTERFACE Device;
+	INT DeviceNum;
+
+public:
+	PPCAP Interface;
+	CHAR Error[PCAP_ERRBUF_SIZE];
+
+public:
+	JyPcap::JyPcap(bool(*IsMyDevice)(PPCAP_INTERFACE))
+		: DeviceNum(0)
+	{
+		pcap_findalldevs(&FirstDevice, Error);
+
+		Device = FirstDevice;
+		while (Device)
+		{
+			if (IsMyDevice(Device))
+			{
+				break;
+			}
+			Device = Device->next;
+		}
+
+		Interface = pcap_open_live(Device->name, 65536, 1, 1000, Error);
+	}
+};
+
+bool IsMyDevice(PPCAP_INTERFACE Device)
+{
+	return (strstr(Device->description, "Microsoft") != NULL) ? true : false;
+}
 
 int main(int argc, char *argv[])
 {
-#if 0
 	if (argc != 2)
 	{
-		cerr << "<Usage> : arpspoof {IP To Spoof}\n";
+		cerr << "<Usage> : jping {IP to ping}\n";
 		return EXIT_FAILURE;
 	}
-
+	
 	using namespace Net;
+	using namespace Packet;
 
-	pcap_if_t*				AllDevices;
-	pcap_if_t*				Device;
-	UINT32						DeviceChosen{ 0 };
-	CHAR						Error[PCAP_ERRBUF_SIZE];
-	INT32						DeviceNum{ 0 };
-
-	pcap_findalldevs(&AllDevices, Error);
-
-	for (Device = AllDevices; Device; Device = Device->next)
+	JyPcap MyPcap(&IsMyDevice);
+	PacketGrouper MyPing(&MyPcap.Interface, IPInfo{ argv[1] });
+	while (true)
 	{
-		cout << "[" << setfill('0') << setw(2) << ++DeviceNum << "] " << Device->name << " : " << Device->description << endl;
+		MyPing.Ping(ICMP_ARCH::ICMPType::ICMP_ECHO);
 	}
 
-	while (DeviceChosen < 1 || DeviceChosen > DeviceNum)
-	{
-		cout << "Manage Interface (1 ~ " << DeviceNum << ") : ";
-		cin >> DeviceChosen;
-
-		if (DeviceChosen < 1 || DeviceChosen > DeviceNum)
-		{
-			cerr << L"Invalid Device Number\n";
-		}
-	}
-
-	Device = AllDevices;
-	while (--DeviceChosen > 0)
-	{
-		Device = Device->next;
-	}
-
-	pcap_t*	Interface{ pcap_open_live(Device->name, 65536, 1, 1000, Error) };
-	if (nullptr == &Interface)
-	{
-		cerr << L"Couldn't open device " << Device->name << " : " << Error << endl;
-		return EXIT_FAILURE;
-	}
-	cout << "Searching network resources...  ";
-
+#if 0
 	Net::IPInfo TargetIP{ string{argv[1]} };
 	ARPSpoofer SnoopSpy(&Interface, TargetIP);
 
@@ -101,6 +112,7 @@ int main(int argc, char *argv[])
 	return EXIT_SUCCESS;
 #endif
 
+#if 0
 	if (argc < 2)
 	{
 		cerr << "<Usage> : " << argv[0] << "blacklist.txt [blacklist2.txt ...]\n";
@@ -134,4 +146,8 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+#endif
+
+
 }

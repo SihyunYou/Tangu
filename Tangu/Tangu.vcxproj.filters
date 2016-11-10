@@ -15,72 +15,72 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TanguSpoof.cpp">
+    <ClCompile Include="net_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TanguAnalyzer.cpp">
+    <ClCompile Include="packet_field.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_PacketField.cpp">
+    <ClCompile Include="tangu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tangu.cpp">
+    <ClCompile Include="tangu_analyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="_NetManager.cpp">
+    <ClCompile Include="tangu_block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TanguBlock.cpp">
+    <ClCompile Include="tangu_spoof.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="_PacketField_ARP">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_PacketField_Ethernet">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_PacketField_IP">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TanguAnalyzer">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TanguSpoof">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_NetManager_IP">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_NetManager_Link">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="_PacketField_ICMP">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="_PacketField">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TanguPing">
+    <ClInclude Include="net_manager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_PacketField_TCP">
+    <ClInclude Include="net_manager_ip.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_WinDivert">
+    <ClInclude Include="net_manager_link.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TanguBlocker">
+    <ClInclude Include="packet_field_arp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_NetManager">
+    <ClInclude Include="packet_field_ethernet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_PacketField">
+    <ClInclude Include="packet_field_icmp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="_TanguBuild">
+    <ClInclude Include="packet_field_ip.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_build.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="windivert.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_analyzer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_blocker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_ping.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_spoof.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_tcp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -29,13 +29,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -153,30 +153,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="TanguAnalyzer.cpp" />
-    <ClCompile Include="TanguBlock.cpp" />
-    <ClCompile Include="TanguSpoof.cpp" />
-    <ClCompile Include="_NetManager.cpp" />
-    <ClCompile Include="_PacketField.cpp" />
-    <ClCompile Include="Tangu.cpp" />
+    <ClCompile Include="tangu_analyzer.cpp" />
+    <ClCompile Include="tangu_block.cpp" />
+    <ClCompile Include="tangu_spoof.cpp" />
+    <ClCompile Include="net_manager.cpp" />
+    <ClCompile Include="packet_field.cpp" />
+    <ClCompile Include="tangu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TanguAnalyzer" />
-    <ClInclude Include="TanguBlocker" />
-    <ClInclude Include="TanguPing" />
-    <ClInclude Include="TanguSpoof" />
-    <ClInclude Include="_NetManager" />
-    <ClInclude Include="_NetManager_IP" />
-    <ClInclude Include="_NetManager_Link" />
-    <ClInclude Include="_PacketField" />
-    <ClInclude Include="_PacketField_ARP" />
-    <ClInclude Include="_PacketField_Ethernet" />
-    <ClInclude Include="_PacketField" />
-    <ClInclude Include="_PacketField_ICMP" />
-    <ClInclude Include="_PacketField_IP" />
-    <ClInclude Include="_PacketField_TCP" />
-    <ClInclude Include="_TanguBuild" />
-    <ClInclude Include="_WinDivert" />
+    <ClInclude Include="tangu_analyzer.hpp" />
+    <ClInclude Include="tangu_blocker.hpp" />
+    <ClInclude Include="tangu_ping.hpp" />
+    <ClInclude Include="tangu_spoof.hpp" />
+    <ClInclude Include="net_manager.hpp" />
+    <ClInclude Include="net_manager_ip.hpp" />
+    <ClInclude Include="net_manager_link.hpp" />
+    <ClInclude Include="packet_field.hpp" />
+    <ClInclude Include="packet_field_arp.hpp" />
+    <ClInclude Include="packet_field_ethernet.hpp" />
+    <ClInclude Include="packet_field_icmp.hpp" />
+    <ClInclude Include="packet_field_ip.hpp" />
+    <ClInclude Include="packet_field_tcp.hpp" />
+    <ClInclude Include="tangu_build.hpp" />
+    <ClInclude Include="windivert.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
