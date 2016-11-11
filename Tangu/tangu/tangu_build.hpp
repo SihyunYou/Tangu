@@ -44,6 +44,7 @@ using _STD thread;
 #include <Chrono>
 using namespace _STD chrono;
 
+#endif /* _TANGU */
 
 #define SCast(x) static_cast<signed __int##x> 
 #define UCast(x) static_cast<unsigned __int##x> 
@@ -98,5 +99,3 @@ To create an application that uses wpcap.dll with Microsoft Visual C++, follow t
 
 #include <CTime>
 #include <Assert.h>
-
-#endif /* _TANGU */

@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\net_manager">
+      <UniqueIdentifier>{3034c968-b1fc-41dc-9a05-6d8619c7b7c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\packet_field">
+      <UniqueIdentifier>{d094d53c-a308-46fa-b2f2-d9c51f689bc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tangu">
+      <UniqueIdentifier>{96729ade-cbcf-47e3-8abf-61c19c67f1da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="net_manager.cpp">
@@ -30,52 +39,49 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="net_manager.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="net_manager_ip.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="net_manager_link.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_field_arp.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_field_ethernet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_field_icmp.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_field_ip.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu_build.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="windivert.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu_analyzer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu_blocker.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu_ping.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu_spoof.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_field_tcp.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="packet_field.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_ethernet.hpp">
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_arp.hpp">
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_ip.hpp">
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_icmp.hpp">
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_field_tcp.hpp">
+      <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_analyzer.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_blocker.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_build.hpp">
+      <Filter>Header Files\tangu</Filter>
     </ClInclude>
     <ClInclude Include="tangu_interface.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_ping.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_spoof.hpp">
+      <Filter>Header Files\tangu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

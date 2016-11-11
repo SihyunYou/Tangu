@@ -70,8 +70,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Lib\boost_1_61_0;$(SolutionDir)\WinDivert-1.2.0-rc-MSVC\include;$(SolutionDir)\WpdPack\Include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\WinDivert-1.2.0-rc-MSVC\x86;$(SolutionDir)\WpdPack\Lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Lib\boost_1_61_0;$(ProjectDir);$(ProjectDir)tangu\;$(ProjectDir)packet_field;$(ProjectDir)net_manager\;$(ProjectDir)winpcap\;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)windivert\x86\;$(ProjectDir)winpcap\x86\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -96,8 +96,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\WpdPack\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(SolutionDir)\WinDivert-1.2.0-rc-MSVC\x86\WinDivert.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)windivert\;$(SolutionDir)\WpdPack\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(ProjectDir)windivert\x86\WinDivert.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
@@ -174,7 +174,6 @@
     <ClInclude Include="packet_field_ip.hpp" />
     <ClInclude Include="packet_field_tcp.hpp" />
     <ClInclude Include="tangu_build.hpp" />
-    <ClInclude Include="windivert.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

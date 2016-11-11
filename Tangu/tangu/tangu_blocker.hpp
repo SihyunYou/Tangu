@@ -2,7 +2,6 @@
 #ifndef _TANGU_BLOCK
 #define _TANGU_BLOCK
 
-#include "windivert.hpp"
 #include <boost/algorithm/string.hpp>
 
 class BlackList
