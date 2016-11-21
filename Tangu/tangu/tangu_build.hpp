@@ -2,100 +2,140 @@
 #ifndef _TANGU
 #define _TANGU
 
-#pragma warning(disable:4091)
-
-#ifndef _SCL_SECURE_NO_WARNINGS
-#define _SCL_SECURE_NO_WARNINGS
-#endif /* _SCL_SECURE_NO_WARNINGS */
+/************************************************* C++ Library *************************************************/
 #include <Algorithm>
-using _STD copy;
-using _STD transform;
-
 using _STD pair;
 using _STD make_pair;
 
+//
+// Standard template libraries for tangu packet structures.
+//
 #include <Iterator>
 #include <Array>
 #include <Vector>
-#include <Forward_list>
-#include <Unordered_map>
+#include <Forward_List>
+#include <Unordered_Map>
 using _STD array;
 using _STD vector;
 using _STD forward_list;
 using _STD unordered_map;
 
 #include <String>
-#include <Fstream>
-#include <Sstream>
 using _STD string;
 using _STD wstring;
 using _STD to_string;
 using _STD to_wstring;
 
+//
+// File stream header. TANGU_BLOCKER needs a list for malware site.
+//
+#include <FStream>
+#include <SStream>
 using _STD ios;
 using _STD ifstream;
 using _STD ofstream;
 using _STD istringstream;
 
-#include <Thread>
-using _STD thread;
-
-#include <Ctime>
+//
+// Time header. Tangu uses chrono to check capturing timeout of injected packets.
+//
+#include <CTime>
 #include <Chrono>
 using namespace _STD chrono;
 
-#endif /* _TANGU */
+/******************************************************************************************************************/
 
-#define SCast(x) static_cast<signed __int##x> 
-#define UCast(x) static_cast<unsigned __int##x> 
+/**************************************** Windows System Library *******************************************/
 
-#define SIZ_ARP	42
-#define SIZ_ICMP	74
+//
+// The windows.h header file is required for applications that use Windows API 
+// (for both Unicode and ANSI versions of the API). Tangu's net_manager and packet_field 
+// use data types typedefed by Windows Headers, API getting system resources.
+//
 
-/* Convenient Lexical Preprocessor */
-#define esac break;
-#define NAMESPACE_BEGIN(var) namespace var{
-#define NAMESPACE_END }
-
-/* Header : _NetManager */
+// Macro notices that you'll build an application without MFC sources.
 #define WIN32_LEAN_AND_MEAN
+
 #include <Windows.h>
+
+//
+// Prevent redefinition of WinSock2.h header, Windows.h header.
+//
+#define _WINSOCKAPI_ 
 #include <WinSock2.h>
-#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 
-#include <IPhlpapi.h>
-#pragma comment(lib, "IPHLPAPI.lib")
+//
+// The Iphlpapi.h header file is required for applications that use the IP Helper functions. 
+// When the Winsock2.h header file is required, the #include line for this file should be 
+// placed before the #include line for the Iphlpapi.h header file. 
+//
+#include <IpHlpAPI.h>
+#pragma comment(lib, "IpHlpAPI.lib")
 
-/* Header : _PacketField */
-/*
-Creating an application that uses wpcap.dll
+/******************************************************************************************************************/
 
-To create an application that uses wpcap.dll with Microsoft Visual C++, follow these steps:
-	•Include the file pcap.h at the beginning of every source file that uses the functions exported by library.
-	•If your program uses Win32 specific functions of WinPcap, remember to include WPCAP among the preprocessor definitions.
-	•If your program uses the remote capture capabilities of WinPcap, add  HAVE_REMOTE among the preprocessor definitions. Do not include remote-ext.h directly in your source files.
-	•Set the options of the linker to include the wpcap.lib library file. wpcap.lib can be found in the WinPcap developer's pack.
-	•Set the options of the linker to include the winsock library file ws2_32.lib. This file is distributed with the C compiler and contains the socket functions for Windows. It is needed by some functions used by the samples in the tutorial.
-*/
+/************************************ Pcap (Packet Capture) Library ****************************************/
 
+//
+// pcap (pcaet capture) consists of the API for capturing network traffic. Windows uses a port of
+// libpcap known as WinPcap. Tangu uses WinPcap to capture packets travelling over a network
+// and, to transmit packets on a network "at the link layer", as well as to get a list of network
+// interfaces. (may be not listed)
+// 
+
+// 
+// If your program uses the remote capture capabilities of WinPcap, add HAVE_REMOTE among 
+// the preprocessor definitions. Do not include remote-ext.h directly in your source files.
+//
 #define HAVE_REMOTE
+
 #include <pcap\pcap.h>
+
+//
 // VC include
+//
 #include <wpcapi.h>
 #pragma comment(lib, "wpcap.lib")
 
-#define DUMP_LENGTH 0x00000800
+/******************************************************************************************************************/
 
-#define SIZ_HARDWARE 6
-#define SIZ_PROTOCOL 4
+/******************************************* WinDivert Library ************************************************/
 
-
-#define WIN32_LEAN_AND_MEAN
-#define _WINSOCKAPI_ // Prevent redefinition of <WinSock2.h>, <Windows.h>
-
+//
+// Windows Packet Divert (WinDivert) is a user-mode packet capture-and-divert package to 
+// capture / sniff / filter / drop / (re)inject / modify network packets.
+// WinDivert can be used to implement user-mode packet filters, packet sniffers, firewalls, NAT, 
+// VPNs, tunneling applications, etc. 
+//
 #pragma managed(push, off)
 #include <windivert\windivert.h>
 #pragma managed(pop)
 
-#include <CTime>
-#include <Assert.h>
+/******************************************************************************************************************/
+
+//
+// Address length on link layer (physical, internet)
+//
+
+#define SIZ_HARDWARE 6
+#define SIZ_PROTOCOL 4
+//
+// Casting preprocessors 
+// You can declare 8-, 16, 32-, or 64-bit integer variables by ising __int[n] type specifier,
+// sized integer types supported by Microsoft C/C++ features.
+//
+#define SCast(data_type_size)	static_cast<signed __int##data_type_size> 
+#define UCast(data_type_size)	static_cast<unsigned __int##data_type_size> 
+#define bitsizeof(data_type)		sizeof(data_type) * CHAR_BIT
+
+//
+// The top header uses flexible syntaxs that specifie where the statements begin and end,
+// for instance, switch, a control statement; namespace, a logical management area.
+//
+#define esac break;
+
+#define NAMESPACE_BEGIN(var) namespace var##{
+#define NAMESPACE_END }
+
+#endif /* _TANGU */

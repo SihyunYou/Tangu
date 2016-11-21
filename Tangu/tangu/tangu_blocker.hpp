@@ -2,52 +2,36 @@
 #ifndef _TANGU_BLOCK
 #define _TANGU_BLOCK
 
+#include "net_manager.hpp"
+#include "packet_field.hpp"
 #include <boost/algorithm/string.hpp>
+namespace Algorithm = boost::algorithm;
 
-class BlackList
+typedef class _BADURL_LIST
 {
 private:
-	ifstream		MalformedList;
-	ofstream		LoggerMalsite;
+	ifstream UrlStream;
+#define LOGGER_PATH "C:\\warning.log"
+	ofstream LogStream;
 
-	time_t		RawTime;
-	struct tm		TimeInfo;
-	char			TimeBuf[0x80];
+	time_t RawTime;
+	struct tm TimeInfo;
+	CHAR TimeBuf[0x80];
 
-	forward_list<string>::iterator It;
 	forward_list<string> BlockedURL;
-	unordered_map<string, string> HTTPParsedInfo;
+	forward_list<string>::iterator It;
 
 public:
-	BlackList::BlackList(const char*);
-	BlackList::~BlackList();
+	_BADURL_LIST::_BADURL_LIST(LPCSTR);
+	_BADURL_LIST::~_BADURL_LIST(void);
 
 private:
-	void BlackList::LogAccessMalsite();
+	void _BADURL_LIST::LogAccess(void);
 
 public:
-	void BlackList::Add(string URL);
-	bool BlackList::PayloadMatch(HTTPHeader HTTPPayload);
-};
+	void _BADURL_LIST::Add(string);
+	bool _BADURL_LIST::Match(LPSTR);
+}BADURL_LIST, *PBADURL_LIST;
 
-class WinDivertDev
-{
-private:
-	WINDIVERT_ADDRESS	PAddr;
-	UINT						ReadLen;
-	HANDLE					HDivertDev;
-
-public:
-	BYTE						Packet[0xFFFF];
-	UINT						PacketLen{ 0 };
-
-public:
-	WinDivertDev::WinDivertDev();
-
-public:
-	bool WinDivertDev::IsValid();
-	BOOL WinDivertDev::Recv();
-	BOOL WinDivertDev::Send();
-};
 
 #endif /* _TANGU_BLOCK */

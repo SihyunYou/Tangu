@@ -81,8 +81,8 @@ typedef struct _IP_HEADER
 
 	USHORT Checksum;
 
-	BYTE SrcIP[4];
-	BYTE DestIP[4];
+	BYTE Source[4];
+	BYTE Destination[4];
 
 } IP_HEADER, *PIP_HEADER;
 #pragma pack(pop)

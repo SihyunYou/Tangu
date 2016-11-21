@@ -1,9 +1,75 @@
 #pragma once
 #include "packet_field.hpp"
 
-namespace Packet /* _PacketField_H # class Utility */
+namespace Packet /* packet_field.hpp */
 {
-	UINT Utility::Trace(const BYTE* Data, UINT Length)
+	__forceinline unsigned __int16 IPCheckSum(PIP_HEADER IPHdrBuf)
+	{
+		unsigned __int8* Buf = (unsigned __int8*)IPHdrBuf;
+		unsigned __int32 Sum{ 0 };
+
+		IPHdrBuf->Checksum = 0;
+		for (int i = 0; i < sizeof(IP_HEADER); i = i + 2)
+		{
+			Sum += ((Buf[i] << 8) + Buf[i + 1]);
+		}
+
+		Sum = (Sum >> 16) + (Sum & 0xFFFF);
+		Sum += (Sum >> 16);
+
+		return  ~((unsigned __int16)Sum & 0xFFFF);
+	}
+	__forceinline unsigned __int16 ICMPCheckSum(PICMP_ARCH ICMPHdrBuf)
+	{
+		unsigned __int8* Buf = (unsigned __int8*)ICMPHdrBuf;
+		unsigned __int32 Sum{ 0 };
+
+		ICMPHdrBuf->Checksum = 0;
+		for (int i = 0; i < sizeof(ICMP_ARCH); i = i + 2)
+		{
+			Sum += ((Buf[i] << 8) + Buf[i + 1]);
+		}
+
+		Sum = (Sum >> 16) + (Sum & 0xFFFF);
+		Sum += (Sum >> 16);
+
+		ICMPHdrBuf->Checksum = ~((unsigned __int16)Sum & 0xFFFF);
+	}
+	__forceinline unsigned __int16 TCPChecksum(PIP_HEADER IPHdrBuf, PTCP_HEADER TCPHdrBuf)
+	{
+		unsigned __int16* Buf{ (unsigned short *)TCPHdrBuf };
+		unsigned short PayloadLen{ ntohs(IPHdrBuf->TotalLength) - sizeof(IP_HEADER) };
+		unsigned __int32 Sum{ 0 };
+
+		TCPHdrBuf->Checksum = 0;
+		for (int i = 0; i < PayloadLen >> 1; i++)
+		{
+			Sum += Buf[i];
+		}
+
+		if (PayloadLen & 2)
+		{
+			Sum += Buf[PayloadLen] & 0x00FF;
+		}
+
+		for (int i = 0; i < 4; ++i)
+		{
+			Sum += ((unsigned __int16*)(&IPHdrBuf->Source))[i];
+		}
+
+		Sum += htons(UCast(16)(IP_HEADER::IPProto::TCP));
+		Sum += htons(PayloadLen);
+
+		Sum = (Sum >> 16) + (Sum & 0xFFFF);
+		Sum += (Sum >> 16);
+
+		TCPHdrBuf->Checksum = ~((unsigned __int16)Sum & 0xFFFF);
+	}
+}
+
+namespace Packet /* packet_field.hpp # class Utility */
+{
+	UINT Utility::Trace(const LPBYTE Data, UINT Length)
 	{
 		if (Length > sizeof(long))
 		{
@@ -22,8 +88,7 @@ namespace Packet /* _PacketField_H # class Utility */
 			return Dec;
 		}
 	}
-
-	void Utility::CustomPermutate(string& Content, const CHAR* Format, ...)
+	void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
 	{
 		CHAR FormatBuf[FORMAT_MESSAGE_ALLOCATE_BUFFER];
 		va_list Marker;
@@ -41,25 +106,25 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 	{
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
 
-		_Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
-		_Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
+		_Rsrc.ISrc = NetUtil::GetIPAddress(AddressInfo);
+		_Rsrc.MSrc = NetUtil::GetMACAddress(AddressInfo);
 	}
 
-	void __ARP::GetARP(ARP_ARCH::Opcode Operation)
+	void __ARP::GetARP(ARP_ARCHITECT::Opcode Operation)
 	{
 		if (Operation == ARP_ARCH::Opcode::REQUEST)
 		{
 			_Rsrc.MDst = "FF-FF-FF-FF-FF-FF";
 		}
-		memcpy(_EthHead.Destination, *_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(_EthHead.Source, *_Rsrc.MSrc, SIZ_HARDWARE);
-		_EthHead.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::ARP));
+		memcpy(EthernetHeader.Destination, *_Rsrc.MDst, SIZ_HARDWARE);
+		memcpy(EthernetHeader.Source, *_Rsrc.MSrc, SIZ_HARDWARE);
+		EthernetHeader.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::ARP));
 		
-		_ARP.HardwareType = htons(UCast(16)(ARP_ARCH::HWType::ETHERNET));
-		_ARP.ProtocolType = htons(UCast(16)(ETHERNET_HEADER::EthernetType::IPV4));
-		_ARP.MACLen = SIZ_HARDWARE;
-		_ARP.IPLen = SIZ_PROTOCOL;
-		_ARP.Operation = htons(UCast(16)(Operation));
+		ARPFrame.HardwareType = htons(UCast(16)(ARP_ARCH::HWType::ETHERNET));
+		ARPFrame.ProtocolType = htons(UCast(16)(ETHERNET_HEADER::EthernetType::IPV4));
+		ARPFrame.MACLen = SIZ_HARDWARE;
+		ARPFrame.IPLen = SIZ_PROTOCOL;
+		ARPFrame.Operation = htons(UCast(16)(Operation));
 
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
 
@@ -68,41 +133,18 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 		_Rsrc.IDst = Net::Utility::GetGatewayIPAddress(AddressInfo);
 		_Rsrc.MDst = "FF-FF-FF-FF-FF-FF";
 
-		memcpy(_ARP.SenderMAC, *_Rsrc.MSrc, SIZ_HARDWARE);
-		memcpy(_ARP.SenderIP, *_Rsrc.ISrc, SIZ_PROTOCOL);
-		memcpy(_ARP.TargetMAC, *_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(_ARP.TargetIP, *_Rsrc.IDst, SIZ_PROTOCOL);
+		memcpy(ARPFrame.SenderMAC, *_Rsrc.MSrc, SIZ_HARDWARE);
+		memcpy(ARPFrame.SenderIP, *_Rsrc.ISrc, SIZ_PROTOCOL);
+		memcpy(ARPFrame.TargetMAC, *_Rsrc.MDst, SIZ_HARDWARE);
+		memcpy(ARPFrame.TargetIP, *_Rsrc.IDst, SIZ_PROTOCOL);
 
-		memcpy(_Msg, &_EthHead, sizeof(ETHERNET_HEADER));
-		memcpy(_Msg + sizeof(ETHERNET_HEADER), &_ARP, sizeof(ARP_ARCH));
+		memcpy(_Msg, &EthernetHeader, sizeof(ETHERNET_HEADER));
+		memcpy(_Msg + sizeof(ETHERNET_HEADER), &ARPFrame, sizeof(ARP_ARCH));
 	}
 }
 
 namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 {
-	USHORT ICMPCheckSum(IP_HEADER* UchkdIP, ICMP_ARCH* UchkdICMP)
-	{
-		UINT Sum{ 0 };
-		UchkdICMP->Checksum = 0;
-		UchkdIP->Checksum = 0;
-
-		USHORT* Short{ (USHORT*)UchkdICMP };
-		for (UINT i = 0; i < sizeof(*UchkdICMP) / 2; i++)
-		{
-			Sum += *(Short + i);
-		}
-
-		Sum += (UchkdIP->SrcIP[0] << 8) + UchkdIP->SrcIP[1] + (UchkdIP->SrcIP[2] << 8) + UchkdIP->SrcIP[3];
-		Sum += (UchkdIP->DestIP[0] << 8) + UchkdIP->DestIP[1] + (UchkdIP->DestIP[2] << 8) + UchkdIP->DestIP[3];
-		Sum += UchkdIP->Protocol + sizeof(Packet::ICMP_ARCH);
-
-		Sum = ((Sum & 0xFFFF0000) >> 16) + (Sum & 0x0000FFFF);
-		Sum += (Sum & 0xFFFF0000) >> 16;
-		Sum = ~Sum & 0x0000FFFF;
-
-		return static_cast<USHORT>(Sum);
-	}
-
 	__ICMP::__ICMP(void) 
 		: Seed(RdFromHW()), Distributer(0, 0xFF00)
 	{
@@ -111,70 +153,66 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		_Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
 		_Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
 
-		_Iden = static_cast<USHORT>(Distributer(Seed));
-		_Seq = static_cast<USHORT>(Distributer(Seed));
-	}
-
-	USHORT __ICMP::CheckSum(void)
-	{
-		return _IPHead.Checksum;
+		Iden = static_cast<USHORT>(Distributer(Seed));
+		Seq = static_cast<USHORT>(Distributer(Seed));
 	}
 
 	void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
 	{
 		/* L2 { Data Link Layer } : Ethernet */
-		memcpy(_EthHead.Destination, *this->_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(_EthHead.Source, *this->_Rsrc.MSrc, SIZ_HARDWARE);
-		_EthHead.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::IPV4));
+		memcpy(EthernetHeader.Destination, *this->_Rsrc.MDst, SIZ_HARDWARE);
+		memcpy(EthernetHeader.Source, *this->_Rsrc.MSrc, SIZ_HARDWARE);
+		EthernetHeader.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::IPV4));
 
 		/* L3 { Network Layer } : IP */
-		_IPHead.IHL = IP_VERSION(IPPROTO_IPV4) | IP_HEADER_LENGTH(20);
-		_IPHead.ServiceType = DSCP_CS_N(0) | ECN(0);
-		_IPHead.TotalLength = (UCHAR)htons(60);
-		_IPHead.ldentification = htons(_Iden++);
-		_IPHead.Fragmention = htons(IP_FLAG(DONT_FRAGMENTS(0) | MORE_FRAGMENTS(0)));
-		_IPHead.Protocol = UCast(8)(Packet::IP_HEADER::IPProto::ICMP);
-		_IPHead.TTL = 128;
-		memcpy(_IPHead.SrcIP, &_Rsrc.ISrc, SIZ_PROTOCOL);
-		memcpy(_IPHead.DestIP, &_Rsrc.IDst, SIZ_PROTOCOL);
-		_IPHead.Checksum = htons(Packet::IPCheckSum(&_IPHead));
+		IPHeader.IHL = IP_VERSION(IPPROTO_IPV4) | IP_HEADER_LENGTH(20);
+		IPHeader.ServiceType = DSCP_CS_N(0) | ECN(0);
+		IPHeader.TotalLength = htons(60);
+		IPHeader.ldentification = htons(Iden++);
+		IPHeader.Fragmention = htons(IP_FLAG(DONT_FRAGMENTS(0) | MORE_FRAGMENTS(0)));
+		IPHeader.Protocol = UCast(8)(Packet::IP_HEADER::IPProto::ICMP);
+		IPHeader.TTL = 128;
+		memcpy(IPHeader.Source, &_Rsrc.ISrc, SIZ_PROTOCOL);
+		memcpy(IPHeader.Destination, &_Rsrc.IDst, SIZ_PROTOCOL);
+		IPHeader.Checksum = htons(Packet::IPCheckSum(&IPHeader));
 
 		/* L3 { Network Layer } : ICMP */
-		_ICMP.Type = UCast(8)(ControlMessage);
-		_ICMP.Code = 0;
-		_ICMP.Identifier = htons(1);
-		_ICMP.Sequence = htons(_Seq++);
-		memcpy(_ICMP.Data, "abcdefghijkmnopqrstuvwabcdefghi", sizeof(_ICMP.Data));
-		_ICMP.Checksum = htons(Packet::ICMPCheckSum(&_IPHead, &_ICMP));
+		ICMPPacket.Type = UCast(8)(ControlMessage);
+		ICMPPacket.Code = 0;
+		ICMPPacket.Identifier = htons(1);
+		ICMPPacket.Sequence = htons(Seq++);
+		memcpy(ICMPPacket.Data, "abcdefghijkmnopqrstuvwabcdefghi", sizeof(ICMPPacket.Data));
+		ICMPPacket.Checksum = htons(Packet::ICMPCheckSum(&IPHeader, &ICMPPacket));
 
-		memcpy(_Msg, &_EthHead, sizeof(ETHERNET_HEADER));
-		memcpy(_Msg + sizeof(ETHERNET_HEADER), &_IPHead, sizeof(Packet::IP_HEADER));
-		memcpy(_Msg + sizeof(ETHERNET_HEADER) + sizeof(Packet::IP_HEADER), &_ICMP, sizeof(Packet::ICMP_ARCH));
+		memcpy(_Msg, &EthernetHeader, sizeof(ETHERNET_HEADER));
+		memcpy(_Msg + sizeof(ETHERNET_HEADER), &IPHeader, sizeof(Packet::IP_HEADER));
+		memcpy(_Msg + sizeof(ETHERNET_HEADER) + sizeof(Packet::IP_HEADER), &ICMPPacket, sizeof(Packet::ICMP_ARCH));
+	}
+
+	__forceinline unsigned __int16 ICMPCheckSum(PIP_HEADER IPHeader, PICMP_ARCH UchkdICMP)
+	{
+		unsigned __int8* Buf = (unsigned __int8*)UchkdICMP;
+		unsigned __int32 Sum{ 0 };
+
+		UchkdICMP->Checksum = 0;
+		for (int i = 0; i < sizeof(ICMP_ARCH); i = i + 2)
+		{
+			Sum += ((Buf[i] << 8) + Buf[i + 1]);
+		}
+
+		Sum = (Sum >> 16) + (Sum & 0xFFFF);
+		Sum += (Sum >> 16);
+
+		return ~((unsigned __int16)Sum & 0xFFFF);
 	}
 }
 
 namespace Packet /* packet_field_ip.hpp */
 {
-	__forceinline USHORT IPCheckSum(Packet::PIP_HEADER UchkdIP)
-	{
-		UINT Sum{ 0 };
-		UchkdIP->Checksum = 0;
-
-		USHORT* Short{ (USHORT*)UchkdIP };
-		for (UINT i = 0; i < sizeof(*UchkdIP) / 2; i++)
-		{
-			Sum += *(Short + i);
-		}
-
-		Sum = ((Sum & 0xFFFF0000) >> 16) + (Sum & 0x0000FFFF);
-		Sum += (Sum & 0xFFFF0000) >> 16;
-		Sum = ~Sum & 0x0000FFFF;
-
-		return static_cast<USHORT>(Sum);
-	}
+	
 }
 
 namespace Packet /* packet_field_tcp.hpp */
 {
-
+	
 }

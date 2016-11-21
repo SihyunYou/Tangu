@@ -4,28 +4,100 @@
 
 #include "tangu_analyzer.hpp"
 
-class PacketGrouper : protected NetInfo
+using namespace std::chrono;
+
+typedef struct _TIME_POINT
+{
+	time_point<system_clock> Start;
+	time_point<system_clock> End;
+	long long _TIME_POINT::operator()(void)
+	{
+		return duration_cast<milliseconds>(End - Start).count();
+	}
+} TIME_POINT, *PTIME_POINT;
+
+class PacketGrouper : protected PCAPTOOL
 {
 private:
-	Packet::ICMP _ICMPPacket;
+	PACKET_INFO ICMPPacketHole;
+	Packet::ICMP ICMPPacket;
 	
 public:
-	PacketGrouper::PacketGrouper(pcap_t** Interface, Net::IPInfo Target)
-		: NetInfo(Interface)
+	typedef struct _STATISTICS
+	{
+		UINT Sent;
+		UINT Received;
+		UINT Lost;
+	} STATISTICS;
+	STATISTICS Stat;
+
+public:
+	PacketGrouper::PacketGrouper(pcap_t** Interface, Net::IPInfo Target) :
+		PCAPTOOL(*Interface),
+		Stat{ 0, 0, 0 }
 	{
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
 		Net::PIPNetTableInfo NetTableInfo = Net::IPNetTableInfo::GetInstance();
 
-		_ICMPPacket._Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
-		_ICMPPacket._Rsrc.IDst = Target;
-		_ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
-		_ICMPPacket._Rsrc.MDst = Net::Utility::GetGatewayMACAddress(NetTableInfo);
+		ICMPPacket._Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
+		ICMPPacket._Rsrc.IDst = Target;
+		ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
+		ICMPPacket._Rsrc.MDst = Net::Utility::GetGatewayMACAddress(NetTableInfo);
 	}
-	void PacketGrouper::Ping(Packet::ICMP_ARCH::ICMPType Type)
+
+private:
+	void PacketGrouper::Request(Packet::ICMP_ARCH::ICMPType Type)
 	{
-		_ICMPPacket.GetICMP(Type);
-		pcap_sendpacket(*_Interface, _ICMPPacket._Msg, 
+		ICMPPacket.GetICMP(Type);
+		pcap_sendpacket(Interface, ICMPPacket._Msg,
 			sizeof(Packet::ETHERNET_HEADER) + sizeof(Packet::IP_HEADER) + sizeof(Packet::ICMP_ARCH));
+	}
+	bool PacketGrouper::Reply(Packet::ICMP_ARCH::ICMPType Type, long long TimeLimit)
+	{
+		TIME_POINT TimePoint;
+		TimePoint.Start = system_clock::now();
+
+		do
+		{
+			if (0 == pcap_next_ex(Interface, &PacketHeader, (const UCHAR**)&PacketData))
+			{
+				TimePoint.End = system_clock::now();
+				continue;
+			};
+
+			ICMPPacketHole.PktParseData(PacketData, PKTBEGIN::LAYER_DATALINK);
+			if (Net::IPInfo{ ICMPPacketHole.IPHeader.Source } == ICMPPacket._Rsrc.IDst)
+			{
+				if (static_cast<Packet::ICMP_ARCH::ICMPType>(ICMPPacketHole.ICMPPacket.Type) == Type)
+				{
+					return true;
+				}
+			}
+
+			TimePoint.End = system_clock::now();
+		} while (TimePoint() < TimeLimit);
+		
+		return false;
+	}
+	
+public:
+	bool PacketGrouper::Echo(long long TimeLimit)
+	{
+		++Stat.Sent;
+		Request(Packet::ICMP_ARCH::ICMPType::ICMP_ECHO);
+		
+		if (false != Reply(Packet::ICMP_ARCH::ICMPType::ICMP_ECHO_REPLY, TimeLimit))
+		{
+			++Stat.Received;
+			return true;
+		}
+
+		++Stat.Lost;
+		return false;
+	}
+	STATISTICS& PacketGrouper::GetStats(void)
+	{
+		return Stat;
 	}
 };
 

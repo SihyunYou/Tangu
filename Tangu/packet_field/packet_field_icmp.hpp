@@ -34,8 +34,8 @@ typedef struct ICMP_ARCHITECTURE
 		ICMP_ADDRESSREPLY = 18,
 		NR_ICMP_TYPES = 19
 	};
-	BYTE Type;		
-	BYTE Code;		/* Sub Type */
+	UCHAR Type;		
+	UCHAR Code;		/* Sub Type */
 	USHORT Checksum;
 
 	USHORT Identifier;
@@ -46,35 +46,32 @@ typedef struct ICMP_ARCHITECTURE
 } ICMP_ARCH, *PICMP_ARCH;
 #pragma pack(pop)
 
-__forceinline USHORT ICMPCheckSum(IP_HEADER *, ICMP_ARCH*);
-
 typedef class __ICMP
 {
 private:
-	random_device					RdFromHW;
+	random_device RdFromHW;
 	/* A Mersenne Twister pseudo-random generator of 32-bit numbers with a state size of 19937 bits. */
-	mt19937							Seed;
+	mt19937 Seed;
 	uniform_int_distribution<> Distributer;
 	
 public:
-	ETHERNET_HEADER _EthHead;
-	IP_HEADER _IPHead;
-	ICMP_ARCH	_ICMP;
+	ETHERNET_HEADER EthernetHeader;
+	IP_HEADER IPHeader;
+	ICMP_ARCH	ICMPPacket;
 
 	BYTE _Msg[_MAX_ETHERNETLEN];
 	Net::L3 _Rsrc;
-	USHORT _Iden;
-	USHORT _Seq;
+	USHORT Iden;
+	USHORT Seq;
 
 public:
 	__ICMP::__ICMP(void);
 
-private:
-	USHORT __ICMP::CheckSum(void);
-
 public:
 	void __ICMP::GetICMP(ICMP_ARCH::ICMPType);
 } ICMP, *PICMP;
+
+__forceinline USHORT ICMPCheckSum(PIP_HEADER, PICMP_ARCH);
 
 NAMESPACE_END /* Packet */
 

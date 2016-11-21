@@ -98,7 +98,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)windivert\;$(SolutionDir)\WpdPack\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(ProjectDir)windivert\x86\WinDivert.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -159,21 +159,21 @@
     <ClCompile Include="tangu.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tangu_analyzer.hpp" />
-    <ClInclude Include="tangu_blocker.hpp" />
-    <ClInclude Include="tangu_interface.hpp" />
-    <ClInclude Include="tangu_ping.hpp" />
-    <ClInclude Include="tangu_spoof.hpp" />
-    <ClInclude Include="net_manager.hpp" />
-    <ClInclude Include="net_manager_ip.hpp" />
-    <ClInclude Include="net_manager_link.hpp" />
-    <ClInclude Include="packet_field.hpp" />
-    <ClInclude Include="packet_field_arp.hpp" />
-    <ClInclude Include="packet_field_ethernet.hpp" />
-    <ClInclude Include="packet_field_icmp.hpp" />
-    <ClInclude Include="packet_field_ip.hpp" />
-    <ClInclude Include="packet_field_tcp.hpp" />
-    <ClInclude Include="tangu_build.hpp" />
+    <ClInclude Include="net_manager\net_manager.hpp" />
+    <ClInclude Include="net_manager\net_manager_ip.hpp" />
+    <ClInclude Include="net_manager\net_manager_link.hpp" />
+    <ClInclude Include="packet_field\packet_field.hpp" />
+    <ClInclude Include="packet_field\packet_field_arp.hpp" />
+    <ClInclude Include="packet_field\packet_field_ethernet.hpp" />
+    <ClInclude Include="packet_field\packet_field_icmp.hpp" />
+    <ClInclude Include="packet_field\packet_field_ip.hpp" />
+    <ClInclude Include="packet_field\packet_field_tcp.hpp" />
+    <ClInclude Include="tangu\tangu_analyzer.hpp" />
+    <ClInclude Include="tangu\tangu_blocker.hpp" />
+    <ClInclude Include="tangu\tangu_build.hpp" />
+    <ClInclude Include="tangu\tangu_interface.hpp" />
+    <ClInclude Include="tangu\tangu_ping.hpp" />
+    <ClInclude Include="tangu\tangu_spoof.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

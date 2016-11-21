@@ -4,37 +4,40 @@
 
 #include "tangu_build.hpp"
 
-namespace Net
+NAMESPACE_BEGIN(Net)
+
+typedef class IPInfo
 {
-	typedef class IPInfo
-	{
-	private:
-		BYTE		_bIP[4];
-		string		_sIP;
+private:
+	BYTE _bIP[4];
+	string _sIP;
 
-	private:
-		void IPInfo::IPStringToHex(const CHAR* IPString, BYTE* Buf);
-		
-	public:
-		IPInfo::IPInfo();
-		IPInfo::IPInfo(const BYTE* IPByte);
-		IPInfo::IPInfo(const string& IPString);
-		IPInfo::IPInfo(const IPInfo& IP);
-		IPInfo::IPInfo(const DWORD dwIP);
-		const IPInfo& IPInfo::operator=(const BYTE* IPByte);
-		const IPInfo& IPInfo::operator=(const string& IPString);
-		const IPInfo& IPInfo::operator=(const IPInfo& IP);
-		const IPInfo& IPInfo::operator=(const DWORD dwIP);
+public:
+	IPInfo::IPInfo(void);
+	IPInfo::IPInfo(const LPBYTE);
+	IPInfo::IPInfo(const string&);
+	IPInfo::IPInfo(const IPInfo&);
+	IPInfo::IPInfo(const DWORD);
+	const IPInfo& IPInfo::operator=(const LPBYTE);
+	const IPInfo& IPInfo::operator=(const string&);
+	const IPInfo& IPInfo::operator=(const IPInfo&);
+	const IPInfo& IPInfo::operator=(const DWORD);
 
-	public:
-		BYTE* IPInfo::operator*(void);
-		BYTE IPInfo::operator[](SIZE_T Octet);
-		bool IPInfo::operator==(IPInfo&);
+private:
+	void IPInfo::ipstr_to_hex(LPCSTR, LPBYTE);
 
-		string IPInfo::uc_bstr(void);
-		IPInfo& IPInfo::Mask(IPInfo&);
-	} *PIPInfo;
-	typedef IPInfo SubnetIPInfo;
-}
+public:
+	const LPBYTE IPInfo::operator*(void);
+	BYTE IPInfo::operator[](SIZE_T);
+	bool IPInfo::operator==(const IPInfo&);
+	string IPInfo::operator()(void);
+
+	bool IPInfo::IsEmpty(void);
+	IPInfo& IPInfo::Mask(IPInfo&);
+} *PIPInfo;
+
+typedef IPInfo SubnetIPInfo;
+
+NAMESPACE_END
 
 #endif /* _NETMANAGE_IP */

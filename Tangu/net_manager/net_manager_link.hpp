@@ -4,31 +4,33 @@
 
 #include "tangu_build.hpp"
 
-namespace Net
+NAMESPACE_BEGIN(Net)
+
+typedef class MACInfo
 {
-	typedef class MACInfo
-	{
-	private:
-		BYTE		_bMAC[6];
-		string		_sMAC;
+private:
+	BYTE _bMAC[6];
+	string _sMAC;
 
-	public:
-		void MACInfo::MACStringToInt(const CHAR* MACString, BYTE* Buf);
+public:
+	MACInfo::MACInfo(void);
+	MACInfo::MACInfo(const LPBYTE);
+	MACInfo::MACInfo(const string&);
+	MACInfo::MACInfo(const MACInfo&);
+	const MACInfo& MACInfo::operator=(const LPBYTE);
+	const MACInfo& MACInfo::operator=(const string&);
+	const MACInfo& MACInfo::operator=(const MACInfo&);
 
-	public:
-		MACInfo::MACInfo(void);
-		MACInfo::MACInfo(const BYTE* MACByte);
-		MACInfo::MACInfo(const string& MACString);
-		MACInfo(const MACInfo& MAC);
-		const MACInfo& MACInfo::operator=(const BYTE* MACByte);
-		const MACInfo& MACInfo::operator=(const string& MACString);
-		const MACInfo& MACInfo::operator=(const MACInfo& MAC);
+private:
+	void MACInfo::macstr_to_hex(LPCSTR, LPBYTE);
 
-	public:
-		bool MACInfo::operator==(const MACInfo& MAC);
-		BYTE* MACInfo::operator*(void);
-		string MACInfo::uc_bstr(void);
-		BYTE MACInfo::operator[](size_t Octet);
-	} *PMACInfo;
-}
+public:
+	const LPBYTE MACInfo::operator*(void);
+	BYTE MACInfo::operator[](SIZE_T);
+	bool MACInfo::operator==(const MACInfo&);
+	string MACInfo::operator()(void);
+} *PMACInfo;
+
+NAMESPACE_END
+
 #endif /* _NETMANAGER_LINK */

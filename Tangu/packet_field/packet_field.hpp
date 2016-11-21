@@ -8,14 +8,21 @@
 #include "packet_field_icmp.hpp"
 #include "packet_field_tcp.hpp"
 
-namespace Packet
+NAMESPACE_BEGIN(Packet)
+
+__forceinline unsigned __int16 IPCheckSum(PIP_HEADER);
+__forceinline unsigned __int16 ICMPCheckSum(PICMP_ARCH);
+__forceinline unsigned __int16 TCPChecksum(PIP_HEADER, PTCP_HEADER);
+
+class Utility
 {
-	class Utility
-	{
-	public:
-		static UINT Utility::Trace(const BYTE*, UINT);
-		static void Utility::CustomPermutate(string&, const CHAR*, ...);
-	};
-}
+public:
+	static UINT Utility::Trace(const LPBYTE, UINT);
+	static void Utility::CustomPermutate(string&, LPCSTR, ...);
+};
+
+NAMESPACE_END
+
+typedef Packet::Utility PktUtil;
 
 #endif /* _PACKETFIELD_H */
