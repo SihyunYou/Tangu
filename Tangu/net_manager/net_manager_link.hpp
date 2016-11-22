@@ -2,14 +2,14 @@
 #ifndef _NETMANAGER_LINK
 #define _NETMANAGER_LINK
 
-#include "tangu_build.hpp"
+#include <tangu\tangu_build.hpp>
 
 NAMESPACE_BEGIN(Net)
 
-typedef class MACInfo
+typedef class TANGU_API MACInfo
 {
 private:
-	BYTE _bMAC[6];
+	BYTE _bMAC[SIZ_HARDWARE];
 	string _sMAC;
 
 public:

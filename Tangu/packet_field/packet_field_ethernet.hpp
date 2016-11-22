@@ -2,7 +2,7 @@
 #ifndef _PACKETFIELD_ETHERNET
 #define _PACKETFIELD_ETHERNET
 
-#include "net_manager.hpp"
+#include <net_manager\net_manager.hpp>
 
 NAMESPACE_BEGIN(Packet)
 

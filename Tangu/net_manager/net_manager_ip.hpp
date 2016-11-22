@@ -2,14 +2,14 @@
 #ifndef _NETMANAGE_IP
 #define _NETMANAGE_IP
 
-#include "tangu_build.hpp"
+#include <tangu\tangu_build.hpp>
 
 NAMESPACE_BEGIN(Net)
 
-typedef class IPInfo
+typedef class TANGU_API IPInfo
 {
 private:
-	BYTE _bIP[4];
+	BYTE _bIP[SIZ_PROTOCOL];
 	string _sIP;
 
 public:

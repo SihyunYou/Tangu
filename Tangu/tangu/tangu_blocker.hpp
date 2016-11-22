@@ -2,12 +2,12 @@
 #ifndef _TANGU_BLOCK
 #define _TANGU_BLOCK
 
-#include "net_manager.hpp"
-#include "packet_field.hpp"
+#include <net_manager\net_manager.hpp>
+#include <packet_field\packet_field.hpp>
 #include <boost/algorithm/string.hpp>
 namespace Algorithm = boost::algorithm;
 
-typedef class _BADURL_LIST
+typedef class TANGU_API _BADURL_LIST
 {
 private:
 	ifstream UrlStream;
@@ -22,7 +22,7 @@ private:
 	forward_list<string>::iterator It;
 
 public:
-	_BADURL_LIST::_BADURL_LIST(LPCSTR);
+	explicit _BADURL_LIST::_BADURL_LIST(LPCSTR);
 	_BADURL_LIST::~_BADURL_LIST(void);
 
 private:

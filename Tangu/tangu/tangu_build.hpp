@@ -2,6 +2,17 @@
 #ifndef _TANGU
 #define _TANGU
 
+//
+// 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+//
+#pragma warning (disable : 4251)
+
+#ifdef TANGU_EXPORTS
+#define TANGU_API __declspec(dllexport)
+#else
+#define TANGU_API __declspec(dllimport)
+#endif
+
 /************************************************* C++ Library *************************************************/
 #include <Algorithm>
 using _STD pair;

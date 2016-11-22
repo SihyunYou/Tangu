@@ -2,7 +2,7 @@
 #ifndef _PACKETFIELD_ARP
 #define _PACKETFIELD_ARP
 
-#include "packet_field_ethernet.hpp"
+#include <packet_field\packet_field_ethernet.hpp>
 
 NAMESPACE_BEGIN(Packet)
 
@@ -40,7 +40,7 @@ typedef struct ARP_ARCHITECT
 	UCHAR TargetIP[4];			// Target Protocol Address
 } ARP_ARCH, *PARP_ARCH;
 
-typedef class __ARP
+typedef class TANGU_API __ARP
 {
 public:
 	ETHERNET_HEADER EthernetHeader;

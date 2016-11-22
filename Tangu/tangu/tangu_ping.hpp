@@ -2,11 +2,11 @@
 #ifndef _TANGU_PING
 #define _TANGU_PING
 
-#include "tangu_analyzer.hpp"
+#include <tangu\tangu_analyzer.hpp>
 
 using namespace std::chrono;
 
-typedef struct _TIME_POINT
+typedef struct TANGU_API _TIME_POINT
 {
 	time_point<system_clock> Start;
 	time_point<system_clock> End;
@@ -16,7 +16,7 @@ typedef struct _TIME_POINT
 	}
 } TIME_POINT, *PTIME_POINT;
 
-class PacketGrouper : protected PCAPTOOL
+class TANGU_API PacketGrouper : protected PCAPTOOL
 {
 private:
 	PACKET_INFO ICMPPacketHole;

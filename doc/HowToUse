@@ -1,0 +1,27 @@
+If you want to make solution files as other samples, it must be done to link the header files, to load valid library(.lib) files first as follows.  
+
+1. Add header directories.
+Go to [Property Pages] - [Configuration Properties] - [VC++ Directories]
+In `Include Directories` tab, add new line and fill these paths.
+
+$(SolutionDir)..\..\tangu\
+$(SolutionDir)..\..\tangu\winpcap\
+
+2. Add library directories.
+Go to [Property Pages] - [Configuration Properties] - [VC++ Directories]
+In `Library Directories` tab, add new line and fill these paths.
+
+$(SolutionDir)..\..\lib\x86\
+$(SolutionDir)..\..\tangu\winpcap\x86\
+$(SolutionDir)..\..\tangu\windivert\x86\
+
+3. Include header files with #include indicator you are to use.
+
+4. Import library with #pragma indicator.
+#pragma comment(lib, "tangu.lib")
+
+5. Write sources, and build them.
+
+6. Excute applications with dlls.
+tangu.dll
+WinDivert.dll

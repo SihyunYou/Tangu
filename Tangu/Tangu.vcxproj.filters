@@ -7,62 +7,41 @@
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd;tpp</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\net_manager">
-      <UniqueIdentifier>{3034c968-b1fc-41dc-9a05-6d8619c7b7c9}</UniqueIdentifier>
+      <UniqueIdentifier>{6848d7fb-3daf-4400-bd7e-a5c5dca3d552}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\packet_field">
-      <UniqueIdentifier>{d094d53c-a308-46fa-b2f2-d9c51f689bc3}</UniqueIdentifier>
+      <UniqueIdentifier>{9f181c1d-255d-4e60-8bb5-6bc1e67912ba}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\tangu">
-      <UniqueIdentifier>{96729ade-cbcf-47e3-8abf-61c19c67f1da}</UniqueIdentifier>
+      <UniqueIdentifier>{8f0a5b05-e7f6-48c3-820b-9d67710e2aca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="net_manager.cpp">
+    <ClCompile Include="..\..\..\..\Tangu\Tangu\net_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="packet_field.cpp">
+    <ClCompile Include="..\..\..\..\Tangu\Tangu\packet_field.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tangu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tangu_entry.cpp">
+    <ClCompile Include="..\..\..\..\Tangu\Tangu\tangu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tangu\tangu_analyzer.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_blocker.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_build.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_interface.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_ping.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_spoof.hpp">
-      <Filter>Header Files\tangu</Filter>
+    <ClInclude Include="net_manager\net_manager_link.hpp">
+      <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="net_manager\net_manager.hpp">
       <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="net_manager\net_manager_ip.hpp">
-      <Filter>Header Files\net_manager</Filter>
-    </ClInclude>
-    <ClInclude Include="net_manager\net_manager_link.hpp">
       <Filter>Header Files\net_manager</Filter>
     </ClInclude>
     <ClInclude Include="packet_field\packet_field.hpp">
@@ -82,6 +61,24 @@
     </ClInclude>
     <ClInclude Include="packet_field\packet_field_tcp.hpp">
       <Filter>Header Files\packet_field</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_analyzer.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_blocker.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_build.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_interface.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_ping.hpp">
+      <Filter>Header Files\tangu</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_spoof.hpp">
+      <Filter>Header Files\tangu</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

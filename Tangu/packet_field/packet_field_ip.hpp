@@ -2,7 +2,7 @@
 #ifndef _PACKETFIELD_IP
 #define _PACKETFIELD_IP
 
-#include "net_manager.hpp"
+#include <net_manager\net_manager.hpp>
 
 NAMESPACE_BEGIN(Packet)
 
@@ -87,7 +87,7 @@ typedef struct _IP_HEADER
 } IP_HEADER, *PIP_HEADER;
 #pragma pack(pop)
 
-USHORT IPCheckSum(Packet::PIP_HEADER);
+TANGU_API USHORT IPCheckSum(Packet::PIP_HEADER);
 
 NAMESPACE_END /* Packet */
 

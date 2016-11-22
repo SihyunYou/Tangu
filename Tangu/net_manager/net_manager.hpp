@@ -2,8 +2,8 @@
 #ifndef _NETMANAGE_H
 #define _NETMANAGE_H
 
-#include "net_manager_ip.hpp" 
-#include "net_manager_link.hpp"
+#include <net_manager\net_manager_ip.hpp>
+#include <net_manager\net_manager_link.hpp>
 
 NAMESPACE_BEGIN(Net)
 
@@ -27,10 +27,10 @@ typedef struct TRANSPORT_LAYER
 	IPInfo			IDst;
 }L4, *PL4;
 
-bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO);
-bool _cdecl CompareDescription(PIP_ADAPTER_INFO);
-bool _cdecl CompareARP(PMIB_IPNETROW);
-typedef class IPAdapterInfo
+TANGU_API bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO);
+TANGU_API bool _cdecl CompareDescription(PIP_ADAPTER_INFO);
+TANGU_API bool _cdecl CompareARP(PMIB_IPNETROW);
+typedef class TANGU_API IPAdapterInfo
 {
 private:
 	DWORD SizeOfBuf;
@@ -52,7 +52,7 @@ public:
 	PIP_ADAPTER_INFO operator()(void);
 	PIP_ADAPTER_INFO GetNode(bool(_cdecl *FuncCompare)(PIP_ADAPTER_INFO));
 } *PIPAdapterInfo;
-typedef class IPNetTableInfo
+typedef class TANGU_API IPNetTableInfo
 {
 private:
 	DWORD Status;
@@ -81,7 +81,7 @@ public:
 	PMIB_IPNETROW IPNetTableInfo::GetNode(bool(_cdecl *FuncCompare)(PMIB_IPNETROW));
 }*PIPNetTableInfo;
 
-class Utility
+class TANGU_API Utility
 {
 public:
 	static MACInfo Utility::GetMACAddress(PIPAdapterInfo);

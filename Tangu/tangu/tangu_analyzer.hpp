@@ -2,9 +2,9 @@
 #ifndef _TANGU_ANALYZER
 #define _TANGU_ANALYZER
 
-#include "net_manager.hpp"
-#include "packet_field.hpp"
-#include "tangu_interface.hpp"
+#include <net_manager\net_manager.hpp>
+#include <packet_field\packet_field.hpp>
+#include <tangu\tangu_interface.hpp>
 
 enum class PKTBEGIN
 {
@@ -13,7 +13,7 @@ enum class PKTBEGIN
 	LAYER_TRANSPORT,
 };
 
-typedef struct _PCAPTOOL
+typedef struct TANGU_API _PCAPTOOL
 {
 protected:
 	PPCAP Interface;
@@ -22,10 +22,10 @@ protected:
 
 protected:
 	_PCAPTOOL::_PCAPTOOL(void);
-	_PCAPTOOL::_PCAPTOOL(PPCAP);
+	explicit _PCAPTOOL::_PCAPTOOL(PPCAP);
 } PCAPTOOL, *PPCAPTOOL;
 
-typedef class PACKET_INFO 
+typedef class TANGU_API PACKET_INFO
 {
 public:
 	//

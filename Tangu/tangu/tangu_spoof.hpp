@@ -2,9 +2,9 @@
 #ifndef _TANGU_SPOOF
 #define _TANGU_SPOOF
 
-#include "tangu_analyzer.hpp"
+#include <tangu\tangu_analyzer.hpp>
 
-class ARPSpoof : protected PCAPTOOL
+class TANGU_API ARPSpoof : protected PCAPTOOL
 {
 public:
 	Packet::ARP ARPFrame;
@@ -17,7 +17,7 @@ public:
 
 protected:
 	void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode);
-	Net::MACInfo ARPSpoof::GetMACAddress(Net::IPInfo& TargetSpoof, DOUBLE TimeLimit)
+	Net::MACInfo ARPSpoof::GetMACAddress(Net::IPInfo& TargetSpoof, double TimeLimit)
 	{
 		GenerateARP(Packet::ARP_ARCH::Opcode::REQUEST);
 

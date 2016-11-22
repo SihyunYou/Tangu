@@ -2,8 +2,8 @@
 #ifndef _PACKETFIELD_ICMP
 #define _PACKETFIELD_ICMP
 
-#include "packet_field_ethernet.hpp"
-#include "packet_field_ip.hpp"
+#include <packet_field\packet_field_icmp.hpp>
+#include <packet_field\packet_field_ip.hpp>
 
 #include <Random>
 
@@ -46,7 +46,7 @@ typedef struct ICMP_ARCHITECTURE
 } ICMP_ARCH, *PICMP_ARCH;
 #pragma pack(pop)
 
-typedef class __ICMP
+typedef class TANGU_API __ICMP
 {
 private:
 	random_device RdFromHW;

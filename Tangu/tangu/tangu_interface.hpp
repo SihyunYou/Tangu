@@ -1,6 +1,6 @@
 #pragma once
-#include "tangu_build.hpp"
-#include "net_manager.hpp"
+#include <tangu\tangu_build.hpp>
+#include <net_manager\net_manager.hpp>
 
 typedef pcap_if PCAP_INTERFACE;
 typedef pcap_if* PPCAP_INTERFACE;
@@ -13,7 +13,7 @@ typedef bpf_u_int32* PBPF_UINT;
 typedef struct pcap_pkthdr PCAP_PKTHDR;
 typedef struct pcap_pkthdr* PPCAP_PKTHDR;
 
-class PCAP_DEVICE
+typedef class TANGU_API PCAP_DEVICE
 {
 private:
 	PPCAP_INTERFACE FirstDevice;
@@ -29,23 +29,25 @@ public:
 	CHAR Error[PCAP_ERRBUF_SIZE];
 
 public:
-	PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE));
+	explicit PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE));
 	PCAP_DEVICE::PCAP_DEVICE(void);
 	PCAP_DEVICE::~PCAP_DEVICE(void);
 
 private:
-	void PCAP_DEVICE::OpenLive(PCHAR DeviceName);
-};
+	void PCAP_DEVICE::OpenLive(LPSTR);
+} *PPCAP_DEVICE;
 
 //
 // PCAP_DEVICE(bool(*)(PPCAP_INTERFACE)) callback function
 //
-bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device);
-bool IsMyDeviceWithDescription(PPCAP_INTERFACE Device);
+TANGU_API bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device);
+TANGU_API bool IsMyDeviceWithDescription(PPCAP_INTERFACE Device);
 
 
 
-typedef class WINDIVERT_DEVICE
+#pragma comment(lib, "WinDivert.lib")
+
+typedef class TANGU_API WINDIVERT_DEVICE
 {
 private:
 	HANDLE HDivertDev;
@@ -69,8 +71,6 @@ public:
 	const LPBYTE WINDIVERT_DEVICE::ReceiveAndSend(void);
 } *PWINDIVERT_DEVICE;
 
-
-#include <boost\config.hpp>
 
 class Win32Exception : public std::exception
 {

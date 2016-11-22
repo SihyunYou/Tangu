@@ -2,7 +2,7 @@
 #ifndef _PACKETFIELD_TCP
 #define _PACKETFIELD_TCP
 
-#include "net_manager.hpp"
+#include <net_manager\net_manager.hpp>
 
 NAMESPACE_BEGIN(Packet)
 
