@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "tangu_analyzer.hpp"
+#include <tangu\tangu_analyzer.hpp>
 
 _PCAPTOOL::_PCAPTOOL(void) :
 	PacketData(nullptr)
@@ -268,7 +268,7 @@ Exit:
 }
 
 
-#include "tangu_spoof.hpp"
+#include <tangu\tangu_spoof.hpp>
 
 ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
 {
@@ -327,7 +327,7 @@ void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 
 
 
-#include "tangu_blocker.hpp"
+#include <tangu\tangu_blocker.hpp>
 
 _BADURL_LIST::_BADURL_LIST(LPCSTR Txt_MalformedSite) :
 	UrlStream(Txt_MalformedSite, ios::in),
@@ -410,7 +410,7 @@ bool _BADURL_LIST::Match(LPSTR HTTPPayload)
 
 
 
-#include "tangu_interface.hpp"
+#include <tangu\tangu_interface.hpp>
 
 PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE)) :
 	DeviceNum(0)

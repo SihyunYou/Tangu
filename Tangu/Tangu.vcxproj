@@ -97,7 +97,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(ProjectDir)windivert\x86\WinDivert.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(SolutionDir)bin\x86\$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>$(SolutionDir)build\x86\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\x86\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <OutputFile>$(SolutionDir)bin\amd64\$(TargetName)$(TargetExt)</OutputFile>
+      <OutputFile>$(SolutionDir)build\amd64\$(TargetName)$(TargetExt)</OutputFile>
       <ImportLibrary>$(SolutionDir)lib\amd64\$(TargetName).lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
@@ -151,11 +151,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\Tangu\Tangu\net_manager.cpp" />
-    <ClCompile Include="..\..\..\..\Tangu\Tangu\packet_field.cpp" />
-    <ClCompile Include="..\..\..\..\Tangu\Tangu\tangu.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="net_manager\net_manager.hpp" />
     <ClInclude Include="net_manager\net_manager_ip.hpp" />
     <ClInclude Include="net_manager\net_manager_link.hpp" />
@@ -171,6 +166,11 @@
     <ClInclude Include="tangu\tangu_interface.hpp" />
     <ClInclude Include="tangu\tangu_ping.hpp" />
     <ClInclude Include="tangu\tangu_spoof.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="net_manager.cpp" />
+    <ClCompile Include="packet_field.cpp" />
+    <ClCompile Include="tangu.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

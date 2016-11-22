@@ -1,5 +1,5 @@
 #pragma once
-#include "net_manager.hpp"
+#include <net_manager\net_manager.hpp>
 
 namespace Net /* net_manager.hpp # class IPAdapterInfo */
 {
