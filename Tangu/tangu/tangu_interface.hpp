@@ -1,4 +1,7 @@
 #pragma once
+#ifndef _TANGU_INTERFACE
+#define _TANGU_INTERFACE
+
 #include <tangu\tangu_build.hpp>
 #include <net_manager\net_manager.hpp>
 
@@ -29,7 +32,7 @@ public:
 	CHAR Error[PCAP_ERRBUF_SIZE];
 
 public:
-	explicit PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE));
+	explicit PCAP_DEVICE::PCAP_DEVICE(bool(*)(PPCAP_INTERFACE));
 	PCAP_DEVICE::PCAP_DEVICE(void);
 	PCAP_DEVICE::~PCAP_DEVICE(void);
 
@@ -98,6 +101,16 @@ public:
 	ErrorSuccessException::ErrorSuccessException(void) :
 		Win32Exception(ERROR_SUCCESS)
 	{
+		ERROR_SUCCESS;
+	}
+};
+
+class ErrorInvalidFunctionException : public Win32Exception
+{
+public:
+	ErrorInvalidFunctionException::ErrorInvalidFunctionException(void) :
+		Win32Exception(ERROR_INVALID_FUNCTION)
+	{
 	}
 };
 
@@ -106,6 +119,24 @@ class ErrorFileNotFoundException : public Win32Exception
 public:
 	ErrorFileNotFoundException::ErrorFileNotFoundException(void) :
 		Win32Exception(ERROR_FILE_NOT_FOUND)
+	{
+	}
+};
+
+class ErrorPathNotFoundException : public Win32Exception
+{
+public:
+	ErrorPathNotFoundException::ErrorPathNotFoundException(void) :
+		Win32Exception(ERROR_PATH_NOT_FOUND)
+	{
+	}
+};
+
+class ErrorTooManyOpenFilesException : public Win32Exception
+{
+public:
+	ErrorTooManyOpenFilesException::ErrorTooManyOpenFilesException(void) :
+		Win32Exception(ERROR_TOO_MANY_OPEN_FILES)
 	{
 	}
 };
@@ -155,15 +186,6 @@ public:
 	}
 };
 
-class ErrorPathNotFoundException : public Win32Exception
-{
-public:
-	ErrorPathNotFoundException::ErrorPathNotFoundException(void) :
-		Win32Exception(ERROR_PATH_NOT_FOUND)
-	{
-	}
-};
-
 class ErrorInvalidParameterException : public Win32Exception
 {
 public:
@@ -208,3 +230,5 @@ public:
 	{
 	}
 };
+
+#endif /* _TANGU_INTERFACE */

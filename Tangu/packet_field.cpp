@@ -69,7 +69,7 @@ namespace Packet /* packet_field.hpp */
 
 namespace Packet /* packet_field.hpp # class Utility */
 {
-	UINT Utility::Trace(const LPBYTE Data, UINT Length)
+	TANGU_API UINT Utility::Trace(const LPBYTE Data, UINT Length)
 	{
 		if (Length > sizeof(long))
 		{
@@ -88,7 +88,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 			return Dec;
 		}
 	}
-	void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
+	TANGU_API void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
 	{
 		CHAR FormatBuf[FORMAT_MESSAGE_ALLOCATE_BUFFER];
 		va_list Marker;
@@ -102,7 +102,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 
 namespace Packet /* packet_field_arp.hpp # class __ARP */
 {
-	__ARP::__ARP(void)
+	TANGU_API __ARP::__ARP(void)
 	{
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
 
@@ -110,7 +110,7 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 		_Rsrc.MSrc = NetUtil::GetMACAddress(AddressInfo);
 	}
 
-	void __ARP::GetARP(ARP_ARCHITECT::Opcode Operation)
+	TANGU_API void __ARP::GetARP(ARP_ARCHITECT::Opcode Operation)
 	{
 		if (Operation == ARP_ARCH::Opcode::REQUEST)
 		{
@@ -145,7 +145,7 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 
 namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 {
-	__ICMP::__ICMP(void) 
+	TANGU_API __ICMP::__ICMP(void)
 		: Seed(RdFromHW()), Distributer(0, 0xFF00)
 	{
 		Net::IPAdapterInfo* AddressInfo = Net::IPAdapterInfo::GetInstance();
@@ -157,7 +157,7 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		Seq = static_cast<USHORT>(Distributer(Seed));
 	}
 
-	void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
+	TANGU_API void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
 	{
 		/* L2 { Data Link Layer } : Ethernet */
 		memcpy(EthernetHeader.Destination, *this->_Rsrc.MDst, SIZ_HARDWARE);

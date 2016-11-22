@@ -1,21 +1,21 @@
 ﻿#pragma once
 #include <tangu\tangu_analyzer.hpp>
 
-_PCAPTOOL::_PCAPTOOL(void) :
+TANGU_API _PCAPTOOL::_PCAPTOOL(void) :
 	PacketData(nullptr)
 {
 
 }
-_PCAPTOOL::_PCAPTOOL(PPCAP PcapInterface) :
+TANGU_API _PCAPTOOL::_PCAPTOOL(PPCAP PcapInterface) :
 	Interface(PcapInterface), PacketData(nullptr)
 {
 
 }
-PACKET_INFO::PACKET_INFO(void)
+TANGU_API PACKET_INFO::PACKET_INFO(void)
 {
 
 }
-string PACKET_INFO::PktParseString(const LPBYTE PacketData, PKTBEGIN Stage)
+TANGU_API string PACKET_INFO::PktParseString(const LPBYTE PacketData, PKTBEGIN Stage)
 {
 	string DumpString("");
 	UINT Offset(0);
@@ -153,7 +153,7 @@ L4: /* TCP/IP PktBegin 4 : Transport PktBegin { TCP }*/
 	case Packet::TCP_HEADER::Port::HTTP:
 		break;
 	}
-	
+
 	goto Pass;
 Exit:
 	DumpString += "\n└────────────────────────────────┘\n";
@@ -270,7 +270,7 @@ Exit:
 
 #include <tangu\tangu_spoof.hpp>
 
-ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
+TANGU_API ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
 {
 	Net::IPAdapterInfo* AddressInfo = Net::IPAdapterInfo::GetInstance();
 
@@ -281,12 +281,12 @@ ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
 	ARPFrame._Rsrc.IDst = Target;
 	ARPFrame._Rsrc.MDst = GetMACAddress(ARPFrame._Rsrc.IDst, 30.0);
 }
-void ARPSpoof::Reply(void)
+TANGU_API void ARPSpoof::Reply(void)
 {
 	ARPFrame._Rsrc.ISrc = Gateway.second;
 	GenerateARP(Packet::ARP_ARCH::Opcode::REPLY);
 }
-void ARPSpoof::Relay()
+TANGU_API void ARPSpoof::Relay()
 {
 	BYTE Msg[1500];
 	PACKET_INFO CommonPacketHole;
@@ -313,11 +313,11 @@ void ARPSpoof::Relay()
 		}
 	} while (Ret >= 0);
 }
-bool ARPSpoof::IsARPValid()
+TANGU_API bool ARPSpoof::IsARPValid()
 {
 	return SuccessReceived;
 }
-void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
+TANGU_API void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 {
 	ARPFrame.GetARP(Operation);
 	pcap_sendpacket(Interface,
@@ -329,7 +329,7 @@ void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 
 #include <tangu\tangu_blocker.hpp>
 
-_BADURL_LIST::_BADURL_LIST(LPCSTR Txt_MalformedSite) :
+TANGU_API _BADURL_LIST::_BADURL_LIST(LPCSTR Txt_MalformedSite) :
 	UrlStream(Txt_MalformedSite, ios::in),
 	LogStream(LOGGER_PATH, ios::out)
 {
@@ -360,19 +360,19 @@ _BADURL_LIST::_BADURL_LIST(LPCSTR Txt_MalformedSite) :
 	time(&RawTime);
 	localtime_s(&TimeInfo, &RawTime);
 }
-_BADURL_LIST::~_BADURL_LIST(void)
+TANGU_API _BADURL_LIST::~_BADURL_LIST(void)
 {
 	LogStream.close();
 }
-void _BADURL_LIST::LogAccess(void)
+TANGU_API void _BADURL_LIST::LogAccess(void)
 {
 	strftime(TimeBuf, sizeof(TimeBuf), "%d-%m-%Y %H-%M-%S", &TimeInfo);
 }
-void _BADURL_LIST::Add(string URL)
+TANGU_API void _BADURL_LIST::Add(string URL)
 {
 	It = BlockedURL.insert_after(It, URL);
 }
-bool _BADURL_LIST::Match(LPSTR HTTPPayload)
+TANGU_API bool _BADURL_LIST::Match(LPSTR HTTPPayload)
 {
 	unordered_map<string, string> HTTPParsedInfo;
 	std::istringstream Resp{ HTTPPayload };
@@ -410,9 +410,83 @@ bool _BADURL_LIST::Match(LPSTR HTTPPayload)
 
 
 
+#include <tangu\tangu_ping.hpp>
+
+long long _TIME_POINT::operator()(void)
+{
+	return duration_cast<milliseconds>(End - Start).count();
+}
+
+PacketGrouper::PacketGrouper(PPCAP* Interface, Net::IPInfo Target) :
+	PCAPTOOL(*Interface),
+	Stat{ 0, 0, 0 }
+{
+	Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
+	Net::PIPNetTableInfo NetTableInfo = Net::IPNetTableInfo::GetInstance();
+
+	ICMPPacket._Rsrc.ISrc = Net::Utility::GetIPAddress(AddressInfo);
+	ICMPPacket._Rsrc.IDst = Target;
+	ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
+	ICMPPacket._Rsrc.MDst = Net::Utility::GetGatewayMACAddress(NetTableInfo);
+}
+
+void PacketGrouper::Request(Packet::ICMP_ARCH::ICMPType Type)
+{
+	ICMPPacket.GetICMP(Type);
+	pcap_sendpacket(Interface, ICMPPacket._Msg,
+		sizeof(Packet::ETHERNET_HEADER) + sizeof(Packet::IP_HEADER) + sizeof(Packet::ICMP_ARCH));
+}
+bool PacketGrouper::Reply(Packet::ICMP_ARCH::ICMPType Type, long long TimeLimit)
+{
+	TIME_POINT TimePoint;
+	TimePoint.Start = system_clock::now();
+
+	do
+	{
+		if (0 == pcap_next_ex(Interface, &PacketHeader, (const UCHAR**)&PacketData))
+		{
+			TimePoint.End = system_clock::now();
+			continue;
+		};
+
+		ICMPPacketHole.PktParseData(PacketData, PKTBEGIN::LAYER_DATALINK);
+		if (Net::IPInfo{ ICMPPacketHole.IPHeader.Source } == ICMPPacket._Rsrc.IDst)
+		{
+			if (static_cast<Packet::ICMP_ARCH::ICMPType>(ICMPPacketHole.ICMPPacket.Type) == Type)
+			{
+				return true;
+			}
+		}
+
+		TimePoint.End = system_clock::now();
+	} while (TimePoint() < TimeLimit);
+
+	return false;
+}
+bool PacketGrouper::Echo(long long TimeLimit)
+{
+	++Stat.Sent;
+	Request(Packet::ICMP_ARCH::ICMPType::ICMP_ECHO);
+
+	if (false != Reply(Packet::ICMP_ARCH::ICMPType::ICMP_ECHO_REPLY, TimeLimit))
+	{
+		++Stat.Received;
+		return true;
+	}
+
+	++Stat.Lost;
+	return false;
+}
+PacketGrouper::STATISTICS& PacketGrouper::GetStats(void)
+{
+	return Stat;
+}
+
+
+
 #include <tangu\tangu_interface.hpp>
 
-PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE)) :
+TANGU_API PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE)) :
 	DeviceNum(0)
 {
 	Status = pcap_findalldevs(&FirstDevice, Error);
@@ -436,7 +510,7 @@ PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE)) :
 PCAP_DEVICE_FAILED:
 	;
 }
-PCAP_DEVICE::PCAP_DEVICE(void)
+TANGU_API PCAP_DEVICE::PCAP_DEVICE(void)
 {
 	DeviceChar = pcap_lookupdev(Error);
 	if (nullptr == DeviceChar)
@@ -461,7 +535,7 @@ PCAP_DEVICE::PCAP_DEVICE(void)
 PCAP_DEVICE_FAILED:
 	;
 }
-PCAP_DEVICE::~PCAP_DEVICE(void)
+TANGU_API PCAP_DEVICE::~PCAP_DEVICE(void)
 {
 	if (nullptr != FirstDevice)
 	{
@@ -469,12 +543,12 @@ PCAP_DEVICE::~PCAP_DEVICE(void)
 	}
 	pcap_close(Interface);
 }
-void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
+TANGU_API void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
 {
 	Interface = pcap_open_live(DeviceName, 65536, 1, 1000, Error);
 }
 
-bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device)
+TANGU_API bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device)
 {
 	PPCAP_ADDRESS PcapAddress = Device->addresses;
 	ADDRESS_FAMILY AddressFamily = PcapAddress->addr->sa_family;
@@ -492,18 +566,18 @@ bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device)
 	}
 	return false;
 }
-bool IsMyDeviceWithDescription(PPCAP_INTERFACE Device)
+TANGU_API bool IsMyDeviceWithDescription(PPCAP_INTERFACE Device)
 {
 	return string(Device->description) == "Microsoft" ? true : false;
 }
 
 
-WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR Filter) :
+TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR Filter) :
 	PacketLen(0)
 {
-	HDivertDev = WinDivertOpen (Filter,
-		WINDIVERT_LAYER::WINDIVERT_LAYER_NETWORK, 
-		0, 
+	HDivertDev = WinDivertOpen(Filter,
+		WINDIVERT_LAYER::WINDIVERT_LAYER_NETWORK,
+		0,
 		0);
 
 	DWORD Errno = GetLastError();
@@ -532,14 +606,14 @@ WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR Filter) :
 		}
 	}
 }
-WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
+TANGU_API WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
 {
 	if (nullptr != HDivertDev)
 	{
 		WinDivertClose(HDivertDev);
 	}
 }
-const LPBYTE WINDIVERT_DEVICE::Receive(void)
+TANGU_API const LPBYTE WINDIVERT_DEVICE::Receive(void)
 {
 	if (TRUE != WinDivertRecv(HDivertDev,
 		Payload,
@@ -552,7 +626,7 @@ const LPBYTE WINDIVERT_DEVICE::Receive(void)
 
 	return Payload;
 }
-const LPBYTE WINDIVERT_DEVICE::Send(void)
+TANGU_API const LPBYTE WINDIVERT_DEVICE::Send(void)
 {
 	if (TRUE != WinDivertSend(HDivertDev,
 		Payload,
@@ -565,7 +639,7 @@ const LPBYTE WINDIVERT_DEVICE::Send(void)
 
 	return Payload;
 }
-const LPBYTE WINDIVERT_DEVICE::ReceiveAndSend(void)
+TANGU_API const LPBYTE WINDIVERT_DEVICE::ReceiveAndSend(void)
 {
 	this->Receive();
 	return this->Send();
@@ -587,11 +661,17 @@ std::exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept
 	case ERROR_SUCCESS:
 		return make_exception_ptr(ErrorSuccessException());
 
+	case ERROR_INVALID_FUNCTION:
+		return make_exception_ptr(ErrorInvalidFunctionException());
+
 	case ERROR_FILE_NOT_FOUND:
 		return make_exception_ptr(ErrorFileNotFoundException());
 
 	case ERROR_PATH_NOT_FOUND:
 		return make_exception_ptr(ErrorPathNotFoundException());
+
+	case ERROR_TOO_MANY_OPEN_FILES:
+		return make_exception_ptr(ErrorTooManyOpenFilesException());
 
 	case ERROR_ACCESS_DENIED:
 		return make_exception_ptr(ErrorAccessDeniedException());
@@ -610,7 +690,6 @@ std::exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept
 
 	case ERROR_PROC_NOT_FOUND:
 		return make_exception_ptr(ErrorProcedureNotFoundException());
-
 
 	default:
 		return make_exception_ptr(Win32Exception(Errno));
@@ -644,5 +723,5 @@ LPCSTR Win32Exception::what(void) const
 
 	LocalFree(lpMassage);
 
-	return (LPCSTR) lpMassage;
+	return (LPCSTR)lpMassage;
 }

@@ -22,6 +22,9 @@
     <Filter Include="Header Files\tangu">
       <UniqueIdentifier>{8f0a5b05-e7f6-48c3-820b-9d67710e2aca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tangu\application">
+      <UniqueIdentifier>{24bde203-54bd-4a71-8b3d-e7e0433a7a53}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="net_manager\net_manager_link.hpp">
@@ -51,23 +54,26 @@
     <ClInclude Include="packet_field\packet_field_tcp.hpp">
       <Filter>Header Files\packet_field</Filter>
     </ClInclude>
-    <ClInclude Include="tangu\tangu_analyzer.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_blocker.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
     <ClInclude Include="tangu\tangu_build.hpp">
       <Filter>Header Files\tangu</Filter>
     </ClInclude>
     <ClInclude Include="tangu\tangu_interface.hpp">
       <Filter>Header Files\tangu</Filter>
     </ClInclude>
-    <ClInclude Include="tangu\tangu_ping.hpp">
-      <Filter>Header Files\tangu</Filter>
+    <ClInclude Include="tangu\tangu_analyzer.hpp">
+      <Filter>Header Files\tangu\application</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_blocker.hpp">
+      <Filter>Header Files\tangu\application</Filter>
     </ClInclude>
     <ClInclude Include="tangu\tangu_spoof.hpp">
-      <Filter>Header Files\tangu</Filter>
+      <Filter>Header Files\tangu\application</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_ping.hpp">
+      <Filter>Header Files\tangu\application</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu_tunnel.h">
+      <Filter>Header Files\tangu\application</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

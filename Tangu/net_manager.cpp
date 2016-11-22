@@ -4,8 +4,8 @@
 namespace Net /* net_manager.hpp # class IPAdapterInfo */
 {
 
-	IPAdapterInfo* IPAdapterInfo::SingleIPAdapterInfo = nullptr;
-	IPAdapterInfo* IPAdapterInfo::GetInstance(void)
+	TANGU_API IPAdapterInfo* IPAdapterInfo::SingleIPAdapterInfo = nullptr;
+	TANGU_API IPAdapterInfo* IPAdapterInfo::GetInstance(void)
 	{
 		if (nullptr == SingleIPAdapterInfo)
 		{
@@ -14,7 +14,7 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 		return SingleIPAdapterInfo;
 	}
 
-	IPAdapterInfo::IPAdapterInfo(void)
+	TANGU_API IPAdapterInfo::IPAdapterInfo(void)
 		: SizeOfBuf(0), AdapterInfo(new IP_ADAPTER_INFO)
 	{
 		IsSuccessed = false;
@@ -38,7 +38,7 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 			}
 		}
 	}
-	IPAdapterInfo::~IPAdapterInfo(void)
+	TANGU_API IPAdapterInfo::~IPAdapterInfo(void)
 	{
 		if (AdapterInfo)
 		{
@@ -46,11 +46,11 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 		}
 	}
 
-	PIP_ADAPTER_INFO IPAdapterInfo::operator()(void)
+	TANGU_API PIP_ADAPTER_INFO IPAdapterInfo::operator()(void)
 	{
 		return AdapterInfo;
 	}
-	PIP_ADAPTER_INFO IPAdapterInfo::GetNode(bool(_cdecl *FuncCompare)(PIP_ADAPTER_INFO))
+	TANGU_API PIP_ADAPTER_INFO IPAdapterInfo::GetNode(bool(_cdecl *FuncCompare)(PIP_ADAPTER_INFO))
 	{
 		bool IsValidResourcesOrNot;
 		while (AdapterInfo)
@@ -67,7 +67,7 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 		return AdapterInfo;
 	}
 
-	bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO IPAdapterInfo)
+	TANGU_API bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO IPAdapterInfo)
 	{
 		Net::IPInfo HostIP(IPAdapterInfo->IpAddressList.IpAddress.String);
 		Net::IPInfo GatewayIP(IPAdapterInfo->GatewayList.IpAddress.String);
@@ -81,7 +81,7 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 		return HostIP.Mask(HostSubnetMask) == GatewayIP.Mask(HostSubnetMask)
 			? true : false;
 	}
-	bool _cdecl CompareDescription(PIP_ADAPTER_INFO IPAdapterInfo)
+	TANGU_API bool _cdecl CompareDescription(PIP_ADAPTER_INFO IPAdapterInfo)
 	{
 		if (nullptr != strstr(IPAdapterInfo->Description, "Wireless"))
 		{
@@ -95,8 +95,8 @@ namespace Net /* net_manager.hpp # class IPAdapterInfo */
 namespace Net /* net_manager.hpp # class IPNetTableInfo */
 {
 
-	IPNetTableInfo* IPNetTableInfo::SingleIPNetTableInfo = nullptr;
-	IPNetTableInfo* IPNetTableInfo::GetInstance(void)
+	TANGU_API IPNetTableInfo* IPNetTableInfo::SingleIPNetTableInfo = nullptr;
+	TANGU_API IPNetTableInfo* IPNetTableInfo::GetInstance(void)
 	{
 		if (nullptr == SingleIPNetTableInfo)
 		{
@@ -105,7 +105,7 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 		return SingleIPNetTableInfo;
 	}
 
-	IPNetTableInfo::IPNetTableInfo(void) : 
+	TANGU_API IPNetTableInfo::IPNetTableInfo(void) :
 		IpNetTable(nullptr), 
 		IsRowCorrespond(false),
 		Type { "", "", "Dynamic", "Static" }
@@ -121,7 +121,7 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 				TRUE);
 		}
 	}
-	IPNetTableInfo::~IPNetTableInfo(void)
+	TANGU_API IPNetTableInfo::~IPNetTableInfo(void)
 	{
 		if (IpNetTable)
 		{
@@ -129,11 +129,11 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 		}
 	}
 
-	PMIB_IPNETTABLE IPNetTableInfo::GetTable(void)
+	TANGU_API PMIB_IPNETTABLE IPNetTableInfo::GetTable(void)
 	{
 		return (PMIB_IPNETTABLE)IpNetTable;
 	}
-	PMIB_IPNETROW IPNetTableInfo::GetNode(bool(_cdecl *FuncCompare)(PMIB_IPNETROW))
+	TANGU_API PMIB_IPNETROW IPNetTableInfo::GetNode(bool(_cdecl *FuncCompare)(PMIB_IPNETROW))
 	{
 		Table = (PMIB_IPNETTABLE)IpNetTable;
 		if (IsRowCorrespond)
@@ -155,7 +155,7 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 		return nullptr;
 	}
 
-	bool _cdecl CompareARP(PMIB_IPNETROW IPNetRow)
+	TANGU_API bool _cdecl CompareARP(PMIB_IPNETROW IPNetRow)
 	{
 		Net::PIPAdapterInfo GatewayAddressInfo = Net::IPAdapterInfo::GetInstance();
 		if (Net::Utility::GetGatewayIPAddress(GatewayAddressInfo)
@@ -171,28 +171,28 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 namespace Net /* net_manager.hpp # class Utility */
 {
 
-	MACInfo Utility::GetMACAddress(PIPAdapterInfo AdaptersInfo)
+	TANGU_API MACInfo Utility::GetMACAddress(PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
 		return nullptr != IpAdapterInfoNode ?
 			MACInfo(IpAdapterInfoNode->Address) :
 			MACInfo();
 	}
-	MACInfo Utility::GetGatewayMACAddress(PIPNetTableInfo NetTableInfo)
+	TANGU_API MACInfo Utility::GetGatewayMACAddress(PIPNetTableInfo NetTableInfo)
 	{
 		PMIB_IPNETROW IpNetRowInfo = NetTableInfo->GetNode(Net::CompareARP);
 		return nullptr != IpNetRowInfo ?
 			MACInfo(IpNetRowInfo->bPhysAddr) :
 			MACInfo();
 	}
-	IPInfo Utility::GetIPAddress(PIPAdapterInfo AdaptersInfo)
+	TANGU_API IPInfo Utility::GetIPAddress(PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
 		return nullptr != IpAdapterInfoNode ?
 			IPInfo(IpAdapterInfoNode->IpAddressList.IpAddress.String) :
 			IPInfo();
 	}
-	IPInfo Utility::GetGatewayIPAddress(PIPAdapterInfo AdaptersInfo)
+	TANGU_API IPInfo Utility::GetGatewayIPAddress(PIPAdapterInfo AdaptersInfo)
 	{
 		PIP_ADAPTER_INFO IpAdapterInfoNode = AdaptersInfo->GetNode(Net::CompareDescription);
 		return nullptr != IpAdapterInfoNode ?
@@ -205,12 +205,12 @@ namespace Net /* net_manager.hpp # class Utility */
 namespace Net /* net_manager_ip.hpp # class IPInfo */
 {
 
-	IPInfo::IPInfo(void)
+	TANGU_API IPInfo::IPInfo(void)
 	{
 		memset(_bIP, 0x00, 4);
 		_sIP = "0.0.0.0";
 	}
-	IPInfo::IPInfo(const LPBYTE IPByte)
+	TANGU_API IPInfo::IPInfo(const LPBYTE IPByte)
 	{
 		if (nullptr != IPByte)
 		{
@@ -225,17 +225,17 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 			_sIP = "0.0.0.0";
 		}
 	}
-	IPInfo::IPInfo(const string& IPString)
+	TANGU_API IPInfo::IPInfo(const string& IPString)
 	{
 		_sIP = IPString;
 		ipstr_to_hex(IPString.c_str(), _bIP);
 	}
-	IPInfo::IPInfo(const IPInfo& IP)
+	TANGU_API IPInfo::IPInfo(const IPInfo& IP)
 	{
 		memcpy(this->_bIP, IP._bIP, 4);
 		_sIP = IP._sIP;
 	}
-	IPInfo::IPInfo(const DWORD dwIP)
+	TANGU_API IPInfo::IPInfo(const DWORD dwIP)
 	{
 		DWORD FullIntegerIP = dwIP;
 		BYTE DividedAddressWithCharType[4];
@@ -246,7 +246,7 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 
 		*this = (IPInfo)DividedAddressWithCharType;
 	}
-	const IPInfo& IPInfo::operator=(const LPBYTE IPByte)
+	TANGU_API const IPInfo& IPInfo::operator=(const LPBYTE IPByte)
 	{
 		memcpy(_bIP, IPByte, 4);
 
@@ -256,27 +256,27 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 
 		return *this;
 	}
-	const IPInfo& IPInfo::operator=(const string& IPString)
+	TANGU_API const IPInfo& IPInfo::operator=(const string& IPString)
 	{
 		_sIP = IPString;
 		ipstr_to_hex(IPString.c_str(), _bIP);
 
 		return *this;
 	}
-	const IPInfo& IPInfo::operator=(const IPInfo& IP)
+	TANGU_API const IPInfo& IPInfo::operator=(const IPInfo& IP)
 	{
 		memcpy(this->_bIP, IP._bIP, 4);
 		_sIP = IP._sIP;
 
 		return *this;
 	}
-	const IPInfo& IPInfo::operator=(const DWORD dwIP)
+	TANGU_API const IPInfo& IPInfo::operator=(const DWORD dwIP)
 	{
 		*this = IPInfo(dwIP);
 		return *this;
 	}
 
-	void IPInfo::ipstr_to_hex(LPCSTR IPString, LPBYTE Buf)
+	TANGU_API void IPInfo::ipstr_to_hex(LPCSTR IPString, LPBYTE Buf)
 	{
 #define STRPOS(str, c) strchr(str, c) - (str) + 1
 		
@@ -290,24 +290,24 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 #undef STRPOS
 	}
 
-	const LPBYTE IPInfo::operator*(void)
+	TANGU_API const LPBYTE IPInfo::operator*(void)
 	{
 		return _bIP;
 	}
-	BYTE IPInfo::operator[](SIZE_T Octet)
+	TANGU_API BYTE IPInfo::operator[](SIZE_T Octet)
 	{
 		return (Octet > 4 || Octet < 1) ? _bIP[Octet] : 0;
 	}
-	bool IPInfo::operator==(const IPInfo& InternetProtocolInfo)
+	TANGU_API bool IPInfo::operator==(const IPInfo& InternetProtocolInfo)
 	{
 		return InternetProtocolInfo._sIP == this->_sIP;
 	}
-	string IPInfo::operator()(void)
+	TANGU_API string IPInfo::operator()(void)
 	{
 		return _sIP;
 	}
 
-	bool IPInfo::IsEmpty(void)
+	TANGU_API bool IPInfo::IsEmpty(void)
 	{
 		for (INT i = SIZ_PROTOCOL - 1; i != 0; --i)
 		{
@@ -318,7 +318,7 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 		}
 		return true;
 	}
-	IPInfo& IPInfo::Mask(IPInfo& SubnetIPAddress)
+	TANGU_API IPInfo& IPInfo::Mask(IPInfo& SubnetIPAddress)
 	{
 		for (INT i = 0; i != SIZ_PROTOCOL; ++i)
 		{
@@ -334,12 +334,12 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 namespace Net /* net_manager_link.hpp # class MACInfo */
 {
 
-	MACInfo::MACInfo(void)
+	TANGU_API MACInfo::MACInfo(void)
 	{
 		memset(_bMAC, 0x00, SIZ_HARDWARE);
 		_sMAC = "00-00-00-00-00-00";
 	}
-	MACInfo::MACInfo(const LPBYTE MediaByte)
+	TANGU_API MACInfo::MACInfo(const LPBYTE MediaByte)
 	{
 		memcpy(_bMAC, MediaByte, SIZ_HARDWARE);
 
@@ -348,17 +348,17 @@ namespace Net /* net_manager_link.hpp # class MACInfo */
 			MediaByte[0], MediaByte[1], MediaByte[2], MediaByte[3], MediaByte[4], MediaByte[5]);
 		_sMAC = MediaAddr;
 	}
-	MACInfo::MACInfo(const string& MediaCode)
+	TANGU_API MACInfo::MACInfo(const string& MediaCode)
 	{
 		_sMAC = MediaCode;
 		this->macstr_to_hex(MediaCode.c_str(), _bMAC);
 	}
-	MACInfo::MACInfo(const MACInfo& MediaAccessControlInfo)
+	TANGU_API MACInfo::MACInfo(const MACInfo& MediaAccessControlInfo)
 	{
 		memcpy(this->_bMAC, MediaAccessControlInfo._bMAC, SIZ_HARDWARE);
 		this->_sMAC = MediaAccessControlInfo._sMAC;
 	}
-	const MACInfo& MACInfo::operator=(const LPBYTE MediaByte)
+	TANGU_API const MACInfo& MACInfo::operator=(const LPBYTE MediaByte)
 	{
 		memcpy(_bMAC, MediaByte, SIZ_HARDWARE);
 
@@ -369,14 +369,14 @@ namespace Net /* net_manager_link.hpp # class MACInfo */
 
 		return *this;
 	}
-	const MACInfo& MACInfo::operator=(const string& MediaCode)
+	TANGU_API const MACInfo& MACInfo::operator=(const string& MediaCode)
 	{
 		this->macstr_to_hex(MediaCode.c_str(), _bMAC);
 		this->_sMAC = MediaCode;
 
 		return *this;
 	}
-	const MACInfo& MACInfo::operator=(const MACInfo& MediaAccessControlInfo)
+	TANGU_API const MACInfo& MACInfo::operator=(const MACInfo& MediaAccessControlInfo)
 	{
 		memcpy(this->_bMAC, MediaAccessControlInfo._bMAC, SIZ_HARDWARE);
 		this->_sMAC = MediaAccessControlInfo._sMAC;
@@ -384,7 +384,7 @@ namespace Net /* net_manager_link.hpp # class MACInfo */
 		return *this;
 	}
 
-	void MACInfo::macstr_to_hex(LPCSTR MediaCode, LPBYTE Buf)
+	TANGU_API void MACInfo::macstr_to_hex(LPCSTR MediaCode, LPBYTE Buf)
 	{
 		UINT Pos{ 0 };
 		while (Pos < SIZ_HARDWARE)
@@ -394,19 +394,19 @@ namespace Net /* net_manager_link.hpp # class MACInfo */
 		}
 	}
 
-	const LPBYTE MACInfo::operator*(void)
+	TANGU_API const LPBYTE MACInfo::operator*(void)
 	{
 		return _bMAC;
 	}
-	BYTE MACInfo::operator[](SIZE_T Octet)
+	TANGU_API BYTE MACInfo::operator[](SIZE_T Octet)
 	{
 		return (Octet >= SIZ_HARDWARE || Octet < 0) ? _bMAC[Octet] : 0;
 	}
-	bool MACInfo::operator==(const MACInfo& MediaAccessControlInfo)
+	TANGU_API bool MACInfo::operator==(const MACInfo& MediaAccessControlInfo)
 	{
 		return MediaAccessControlInfo._sMAC == this->_sMAC;
 	}
-	string MACInfo::operator()(void)
+	TANGU_API string MACInfo::operator()(void)
 	{
 		return _sMAC;
 	}
