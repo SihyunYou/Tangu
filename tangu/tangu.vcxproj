@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="net_manager\net_manager.hpp" />
+    <ClInclude Include="net_manager\net_manager_exception.hpp" />
     <ClInclude Include="net_manager\net_manager_ip.hpp" />
     <ClInclude Include="net_manager\net_manager_link.hpp" />
     <ClInclude Include="packet_field\packet_field.hpp" />
@@ -163,10 +164,11 @@
     <ClInclude Include="tangu\tangu_analyzer.hpp" />
     <ClInclude Include="tangu\tangu_blocker.hpp" />
     <ClInclude Include="tangu\tangu_build.hpp" />
+    <ClInclude Include="tangu\tangu_divert.hpp" />
+    <ClInclude Include="tangu\tangu_exception.hpp" />
     <ClInclude Include="tangu\tangu_interface.hpp" />
     <ClInclude Include="tangu\tangu_ping.hpp" />
     <ClInclude Include="tangu\tangu_spoof.hpp" />
-    <ClInclude Include="tangu_tunnel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="net_manager.cpp" />

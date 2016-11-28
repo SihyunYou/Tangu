@@ -60,7 +60,7 @@ public:
 	ICMP_ARCH	ICMPPacket;
 
 	BYTE _Msg[_MAX_ETHERNETLEN];
-	Net::L3 _Rsrc;
+	Net::L3ID _Rsrc;
 	USHORT Iden;
 	USHORT Seq;
 
@@ -70,8 +70,6 @@ public:
 public:
 	void __ICMP::GetICMP(ICMP_ARCH::ICMPType);
 } ICMP, *PICMP;
-
-__forceinline USHORT ICMPCheckSum(PIP_HEADER, PICMP_ARCH);
 
 NAMESPACE_END /* Packet */
 

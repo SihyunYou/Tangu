@@ -1,9 +1,56 @@
 #pragma once
 #include <packet_field\packet_field.hpp>
 
-namespace Packet /* packet_field.hpp */
+namespace Packet /* packet_field.hpp # class Utility */
 {
-	__forceinline unsigned __int16 IPCheckSum(PIP_HEADER IPHdrBuf)
+	TANGU_API unsigned __int64 __forceinline Utility::Trace(LPCBYTE Data, UINT Length)
+	{
+		if (Length > sizeof(long long))
+		{
+			return -1;
+		}
+		UINT64 Decimal(0);
+		for (auto i = 0; i != Length; ++i)
+		{
+			Decimal += (Data[i] << (i * CHAR_BIT));
+		}
+
+		switch (Length)
+		{
+		case 2 :
+		{
+			return hton16(Decimal);
+		}
+		esac
+		case 4 :
+		{
+			return hton32(Decimal);
+		}
+		esac
+		case 6 :
+		{
+			return hton48(Decimal);
+		}
+		case 8 :
+		{
+			return hton64(Decimal);
+		}
+		default:
+			return Decimal;
+		}
+	}
+	TANGU_API void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
+	{
+		CHAR FormatBuf[FORMAT_MESSAGE_ALLOCATE_BUFFER];
+		va_list Marker;
+
+		va_start(Marker, Format);
+		vsprintf_s(FormatBuf, Format, Marker);
+
+		Content += FormatBuf;
+	}
+
+	TANGU_API unsigned __int16 Utility::IPCheckSum(PIP_HEADER IPHdrBuf)
 	{
 		unsigned __int8* Buf = (unsigned __int8*)IPHdrBuf;
 		unsigned __int32 Sum{ 0 };
@@ -19,12 +66,12 @@ namespace Packet /* packet_field.hpp */
 
 		return  ~((unsigned __int16)Sum & 0xFFFF);
 	}
-	__forceinline unsigned __int16 ICMPCheckSum(PICMP_ARCH ICMPHdrBuf)
+	TANGU_API unsigned __int16 Utility::ICMPCheckSum(PICMP_ARCH UchkdICMP)
 	{
-		unsigned __int8* Buf = (unsigned __int8*)ICMPHdrBuf;
+		unsigned __int8* Buf = (unsigned __int8*)UchkdICMP;
 		unsigned __int32 Sum{ 0 };
 
-		ICMPHdrBuf->Checksum = 0;
+		UchkdICMP->Checksum = 0;
 		for (int i = 0; i < sizeof(ICMP_ARCH); i = i + 2)
 		{
 			Sum += ((Buf[i] << 8) + Buf[i + 1]);
@@ -33,9 +80,9 @@ namespace Packet /* packet_field.hpp */
 		Sum = (Sum >> 16) + (Sum & 0xFFFF);
 		Sum += (Sum >> 16);
 
-		ICMPHdrBuf->Checksum = ~((unsigned __int16)Sum & 0xFFFF);
+		return ~((unsigned __int16)Sum & 0xFFFF);
 	}
-	__forceinline unsigned __int16 TCPChecksum(PIP_HEADER IPHdrBuf, PTCP_HEADER TCPHdrBuf)
+	TANGU_API unsigned __int16 Utility::TCPCheckSum(PIP_HEADER IPHdrBuf, PTCP_HEADER TCPHdrBuf)
 	{
 		unsigned __int16* Buf{ (unsigned short *)TCPHdrBuf };
 		unsigned short PayloadLen{ ntohs(IPHdrBuf->TotalLength) - sizeof(IP_HEADER) };
@@ -63,40 +110,7 @@ namespace Packet /* packet_field.hpp */
 		Sum = (Sum >> 16) + (Sum & 0xFFFF);
 		Sum += (Sum >> 16);
 
-		TCPHdrBuf->Checksum = ~((unsigned __int16)Sum & 0xFFFF);
-	}
-}
-
-namespace Packet /* packet_field.hpp # class Utility */
-{
-	TANGU_API UINT Utility::Trace(const LPBYTE Data, UINT Length)
-	{
-		if (Length > sizeof(long))
-		{
-			return -1;
-		}
-		else
-		{
-			CHAR Buf[0x20] = { 0 };
-			DWORD Dec = 0;
-			for (int Byte = Length - 1; Byte >= 0; --Byte)
-			{
-				sprintf_s(Buf, "%i", Data[Length - Byte - 1]);
-				Dec += (atoi(Buf) << (Byte * CHAR_BIT));
-			}
-
-			return Dec;
-		}
-	}
-	TANGU_API void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
-	{
-		CHAR FormatBuf[FORMAT_MESSAGE_ALLOCATE_BUFFER];
-		va_list Marker;
-
-		va_start(Marker, Format);
-		vsprintf_s(FormatBuf, Format, Marker);
-
-		Content += FormatBuf;
+		return TCPHdrBuf->Checksum = ~((unsigned __int16)Sum & 0xFFFF);
 	}
 }
 
@@ -116,8 +130,8 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 		{
 			_Rsrc.MDst = "FF-FF-FF-FF-FF-FF";
 		}
-		memcpy(EthernetHeader.Destination, *_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(EthernetHeader.Source, *_Rsrc.MSrc, SIZ_HARDWARE);
+		EthernetHeader.Destination = (UINT64) _Rsrc.MDst;
+		EthernetHeader.Source = (UINT64) _Rsrc.MSrc;
 		EthernetHeader.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::ARP));
 		
 		ARPFrame.HardwareType = htons(UCast(16)(ARP_ARCH::HWType::ETHERNET));
@@ -133,10 +147,10 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 		_Rsrc.IDst = Net::Utility::GetGatewayIPAddress(AddressInfo);
 		_Rsrc.MDst = "FF-FF-FF-FF-FF-FF";
 
-		memcpy(ARPFrame.SenderMAC, *_Rsrc.MSrc, SIZ_HARDWARE);
-		memcpy(ARPFrame.SenderIP, *_Rsrc.ISrc, SIZ_PROTOCOL);
-		memcpy(ARPFrame.TargetMAC, *_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(ARPFrame.TargetIP, *_Rsrc.IDst, SIZ_PROTOCOL);
+		ARPFrame.SenderMAC = (UINT64) _Rsrc.MSrc;
+		ARPFrame.SenderIP = (UINT) _Rsrc.ISrc;
+		ARPFrame.TargetMAC = (UINT64) _Rsrc.MDst;
+		ARPFrame.TargetIP = (UINT) _Rsrc.IDst;
 
 		memcpy(_Msg, &EthernetHeader, sizeof(ETHERNET_HEADER));
 		memcpy(_Msg + sizeof(ETHERNET_HEADER), &ARPFrame, sizeof(ARP_ARCH));
@@ -160,8 +174,8 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 	TANGU_API void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
 	{
 		/* L2 { Data Link Layer } : Ethernet */
-		memcpy(EthernetHeader.Destination, *this->_Rsrc.MDst, SIZ_HARDWARE);
-		memcpy(EthernetHeader.Source, *this->_Rsrc.MSrc, SIZ_HARDWARE);
+		EthernetHeader.Destination = (UINT64) _Rsrc.MDst;
+		EthernetHeader.Source = (UINT64) _Rsrc.MSrc;
 		EthernetHeader.Type = htons(UCast(16)(ETHERNET_HEADER::EthernetType::IPV4));
 
 		/* L3 { Network Layer } : IP */
@@ -172,9 +186,9 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		IPHeader.Fragmention = htons(IP_FLAG(DONT_FRAGMENTS(0) | MORE_FRAGMENTS(0)));
 		IPHeader.Protocol = UCast(8)(Packet::IP_HEADER::IPProto::ICMP);
 		IPHeader.TTL = 128;
-		memcpy(IPHeader.Source, &_Rsrc.ISrc, SIZ_PROTOCOL);
-		memcpy(IPHeader.Destination, &_Rsrc.IDst, SIZ_PROTOCOL);
-		IPHeader.Checksum = htons(Packet::IPCheckSum(&IPHeader));
+		IPHeader.Source = (UINT) _Rsrc.ISrc;
+		IPHeader.Destination = (UINT) _Rsrc.IDst;
+		IPHeader.Checksum = htons(PktUtil::IPCheckSum(&IPHeader));
 
 		/* L3 { Network Layer } : ICMP */
 		ICMPPacket.Type = UCast(8)(ControlMessage);
@@ -182,28 +196,11 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		ICMPPacket.Identifier = htons(1);
 		ICMPPacket.Sequence = htons(Seq++);
 		memcpy(ICMPPacket.Data, "abcdefghijkmnopqrstuvwabcdefghi", sizeof(ICMPPacket.Data));
-		ICMPPacket.Checksum = htons(Packet::ICMPCheckSum(&IPHeader, &ICMPPacket));
+		ICMPPacket.Checksum = htons(PktUtil::ICMPCheckSum(&ICMPPacket));
 
 		memcpy(_Msg, &EthernetHeader, sizeof(ETHERNET_HEADER));
 		memcpy(_Msg + sizeof(ETHERNET_HEADER), &IPHeader, sizeof(Packet::IP_HEADER));
 		memcpy(_Msg + sizeof(ETHERNET_HEADER) + sizeof(Packet::IP_HEADER), &ICMPPacket, sizeof(Packet::ICMP_ARCH));
-	}
-
-	__forceinline unsigned __int16 ICMPCheckSum(PIP_HEADER IPHeader, PICMP_ARCH UchkdICMP)
-	{
-		unsigned __int8* Buf = (unsigned __int8*)UchkdICMP;
-		unsigned __int32 Sum{ 0 };
-
-		UchkdICMP->Checksum = 0;
-		for (int i = 0; i < sizeof(ICMP_ARCH); i = i + 2)
-		{
-			Sum += ((Buf[i] << 8) + Buf[i + 1]);
-		}
-
-		Sum = (Sum >> 16) + (Sum & 0xFFFF);
-		Sum += (Sum >> 16);
-
-		return ~((unsigned __int16)Sum & 0xFFFF);
 	}
 }
 

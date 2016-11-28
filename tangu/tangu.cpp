@@ -11,13 +11,16 @@ TANGU_API _PCAPTOOL::_PCAPTOOL(PPCAP PcapInterface) :
 {
 
 }
-TANGU_API PACKET_INFO::PACKET_INFO(void)
+TANGU_API PACKET_INFO::PACKET_INFO(void) :
+	PacketData(nullptr)
 {
-
 }
-TANGU_API string PACKET_INFO::PktParseString(const LPBYTE PacketData, PKTBEGIN Stage)
+TANGU_API PACKET_INFO::PACKET_INFO(LPCBYTE _PacketData) : 
+	PacketData(_PacketData)
 {
-	string DumpString("");
+}
+void PACKET_INFO::ParseData(PKTBEGIN Stage)
+{
 	UINT Offset(0);
 
 	switch (Stage)
@@ -30,158 +33,15 @@ TANGU_API string PACKET_INFO::PktParseString(const LPBYTE PacketData, PKTBEGIN S
 
 	case PKTBEGIN::LAYER_TRANSPORT:
 		goto L4;
+
+	case PKTBEGIN::LAYER_APPLICATION:
+		goto L5;
 	}
 
 L2:	/* TCP/IP PktBegin 2 : Data Link PktBegin { Ethernet } */
 
-	memcpy(EthernetHeader.Destination, PacketData, 6);
-	memcpy(EthernetHeader.Source, PacketData + 6, 6);
-	EthernetHeader.Type = PktUtil::Trace(PacketData + 12, 2);
-	DumpString += "┌────────────────────────────────┐\n";
-
-	PktUtil::CustomPermutate(DumpString, "│   [Source MAC]   %02x:%02x:%02x:%02x:%02x:%02x                             │\n",
-		EthernetHeader.Source[0], EthernetHeader.Source[1], EthernetHeader.Source[2], EthernetHeader.Source[3], EthernetHeader.Source[4], EthernetHeader.Source[5]);
-
-	PktUtil::CustomPermutate(DumpString, "│[Destination MAC] %02x:%02x:%02x:%02x:%02x:%02x                             │\n",
-		EthernetHeader.Destination[0], EthernetHeader.Destination[1], EthernetHeader.Destination[2], EthernetHeader.Destination[3], EthernetHeader.Destination[4], EthernetHeader.Destination[5]);
-
-	Offset += sizeof(Packet::ETHERNET_HEADER);
-	DumpString += "│      [Type]      ";
-	switch (static_cast<Packet::ETHERNET_HEADER::EthernetType> (htons(EthernetHeader.Type)))
-	{
-	case Packet::ETHERNET_HEADER::EthernetType::ARP:
-		DumpString += "Address Resolution Protocol (ARP) ";
-		ARPFrame.HardwareType = PktUtil::Trace(PacketData, 2);
-		ARPFrame.ProtocolType = PktUtil::Trace(PacketData + 2, 2);
-		ARPFrame.MACLen = PktUtil::Trace(PacketData + 4, 1);
-		ARPFrame.IPLen = PktUtil::Trace(PacketData + 5, 1);
-		ARPFrame.Operation = PktUtil::Trace(PacketData + 6, 2);
-
-		memcpy(ARPFrame.SenderMAC, PacketData + 8, SIZ_HARDWARE);
-		memcpy(ARPFrame.SenderIP, PacketData + 14, SIZ_PROTOCOL);
-		memcpy(ARPFrame.TargetMAC, PacketData + 18, SIZ_HARDWARE);
-		memcpy(ARPFrame.TargetIP, PacketData + 24, SIZ_PROTOCOL);
-
-		goto Exit;
-
-	case Packet::ETHERNET_HEADER::EthernetType::IPV4:
-		DumpString += "Internet Protocol Version 4 (IPv4)";
-		break;
-
-	}
-	PktUtil::CustomPermutate(DumpString, " (0x%04x)   │\n", EthernetHeader.Type);
-	DumpString += "└────────────────────────────────┘\n";
-
-
-L3: /* TCP/IP PktBegin 3 : Internet PktBegin { IPv4 }*/
-
-	IPHeader.IHL = PktUtil::Trace(PacketData, 1);
-	IPHeader.ServiceType = PktUtil::Trace(PacketData + 1, 1);
-	IPHeader.TotalLength = PktUtil::Trace(PacketData + 2, 2);
-	IPHeader.ldentification = PktUtil::Trace(PacketData + 4, 2);
-
-	IPHeader.Fragmention = PktUtil::Trace(PacketData + 6, 2);
-	IPHeader.TTL = PktUtil::Trace(PacketData + 8, 1);
-	IPHeader.Protocol = PktUtil::Trace(PacketData + 9, 1);
-	IPHeader.Checksum = PktUtil::Trace(PacketData + 10, 2);
-	memcpy(IPHeader.Source, PacketData + 12, SIZ_PROTOCOL);
-	memcpy(IPHeader.Destination, PacketData + 16, SIZ_PROTOCOL);
-
-	DumpString += "┌────────────────────────────────┐\n";
-	PktUtil::CustomPermutate(DumpString, "│   [Source  IP]   %3i.%3i.%3i.%3i                               │\n",
-		IPHeader.Source[0], IPHeader.Source[1], IPHeader.Source[2], IPHeader.Source[3]);
-	PktUtil::CustomPermutate(DumpString, "│ [Destination IP] %3i.%3i.%3i.%3i                               │\n",
-		IPHeader.Destination[0], IPHeader.Destination[1], IPHeader.Destination[2], IPHeader.Destination[3]);
-
-	DumpString += "│    [Protocol]    ";
-	Offset += sizeof(Packet::IP_HEADER);
-	switch (static_cast<Packet::IP_HEADER::IPProto>(IPHeader.Protocol))
-	{
-	case Packet::IP_HEADER::IPProto::ICMP:
-		DumpString += "ICMP   ";
-
-		ICMPPacket.Type = PktUtil::Trace(PacketData, 1);
-		ICMPPacket.Code = PktUtil::Trace(PacketData + 1, 1);
-		ICMPPacket.Checksum = PktUtil::Trace(PacketData + 2, 2);
-		ICMPPacket.Identifier = PktUtil::Trace(PacketData + 4, 2);
-		ICMPPacket.Sequence = PktUtil::Trace(PacketData + 6, 2);
-
-		memcpy(ICMPPacket.Data, "abcdefghijklmnopqrstuvwabcdfghi", 32);
-
-		goto Exit;
-
-	case Packet::IP_HEADER::IPProto::TCP:
-		DumpString += "Transmission Control Protocol (TCP)";
-		break;
-
-	case Packet::IP_HEADER::IPProto::USER_DATAGRAM:
-		DumpString += "User Datagram Protocol (UDP)";
-		goto Exit;
-
-	default:
-		DumpString += "UNKNOWN";
-		goto Exit;
-	}
-	PktUtil::CustomPermutate(DumpString, " (0x%02x)                                │\n", IPHeader.Protocol);
-	DumpString += "└────────────────────────────────┘\n";
-
-
-L4: /* TCP/IP PktBegin 4 : Transport PktBegin { TCP }*/
-
-	TCPHeader.SrcPort = PktUtil::Trace(PacketData, 2);
-	TCPHeader.DstPort = PktUtil::Trace(PacketData + 2, 2);
-	TCPHeader.Sequence = PktUtil::Trace(PacketData + 4, 4);
-	TCPHeader.Acknowledgemnet = PktUtil::Trace(PacketData + 8, 4);
-
-	TCPHeader.FHL = PktUtil::Trace(PacketData + 12, 2);
-	TCPHeader.WindowSize = PktUtil::Trace(PacketData + 14, 2);
-	TCPHeader.Checksum = PktUtil::Trace(PacketData + 16, 2);
-	TCPHeader.UrgentPointer = PktUtil::Trace(PacketData + 18, 2);
-
-	DumpString += "┌────────────────────────────────┐\n";
-	PktUtil::CustomPermutate(DumpString, "│   [Source  Port]   %5i                                       │\n", TCPHeader.SrcPort);
-	PktUtil::CustomPermutate(DumpString, "│ [Destination Port] %5i                                       │\n", TCPHeader.DstPort);
-	DumpString += "└────────────────────────────────┘\n";
-
-	//
-	// sizeof(Packet::TCP_HEADER) + TCP Options' size 
-	//
-	Offset += (((TCPHeader.FHL >> 12) & 0x07) * 4);
-
-	switch (static_cast<Packet::TCP_HEADER::Port>(TCPHeader.DstPort))
-	{
-	case Packet::TCP_HEADER::Port::HTTP:
-		break;
-	}
-
-	goto Pass;
-Exit:
-	DumpString += "\n└────────────────────────────────┘\n";
-Pass:
-	DumpString += "\n\n";
-	return DumpString;
-}
-void PACKET_INFO::PktParseData(const LPBYTE PacketData, PKTBEGIN Stage)
-{
-	string DumpString("");
-	UINT Offset(0);
-
-	switch (Stage)
-	{
-	case PKTBEGIN::LAYER_DATALINK:
-		goto L2;
-
-	case PKTBEGIN::LAYER_NETWORK:
-		goto L3;
-
-	case PKTBEGIN::LAYER_TRANSPORT:
-		goto L4;
-	}
-
-L2:	/* TCP/IP PktBegin 2 : Data Link PktBegin { Ethernet } */
-
-	memcpy(EthernetHeader.Destination, PacketData, 6);
-	memcpy(EthernetHeader.Source, PacketData + 6, 6);
+	EthernetHeader.Destination = PktUtil::Trace(PacketData, SIZ_HARDWARE);
+	EthernetHeader.Source = PktUtil::Trace(PacketData + 6, SIZ_HARDWARE);
 	EthernetHeader.Type = PktUtil::Trace(PacketData + 12, 2);
 
 	Offset += sizeof(Packet::ETHERNET_HEADER);
@@ -193,11 +53,11 @@ L2:	/* TCP/IP PktBegin 2 : Data Link PktBegin { Ethernet } */
 		ARPFrame.MACLen = PktUtil::Trace(PacketData + 4, 1);
 		ARPFrame.IPLen = PktUtil::Trace(PacketData + 5, 1);
 		ARPFrame.Operation = PktUtil::Trace(PacketData + 6, 2);
-
-		memcpy(ARPFrame.SenderMAC, PacketData + 8, SIZ_HARDWARE);
-		memcpy(ARPFrame.SenderIP, PacketData + 14, SIZ_PROTOCOL);
-		memcpy(ARPFrame.TargetMAC, PacketData + 18, SIZ_HARDWARE);
-		memcpy(ARPFrame.TargetIP, PacketData + 24, SIZ_PROTOCOL);
+		
+		ARPFrame.SenderMAC = PktUtil::Trace(PacketData + 8, SIZ_HARDWARE);
+		ARPFrame.SenderIP = PktUtil::Trace(PacketData + 14, SIZ_PROTOCOL);
+		ARPFrame.TargetMAC = PktUtil::Trace(PacketData + 18, SIZ_HARDWARE);
+		ARPFrame.TargetIP = PktUtil::Trace(PacketData + 24, SIZ_PROTOCOL);
 
 		goto Exit;
 
@@ -216,8 +76,8 @@ L3: /* TCP/IP PktBegin 3 : Internet PktBegin { IPv4 }*/
 	IPHeader.TTL = PktUtil::Trace(PacketData + 8, 1);
 	IPHeader.Protocol = PktUtil::Trace(PacketData + 9, 1);
 	IPHeader.Checksum = PktUtil::Trace(PacketData + 10, 2);
-	memcpy(IPHeader.Source, PacketData + 12, SIZ_PROTOCOL);
-	memcpy(IPHeader.Destination, PacketData + 16, SIZ_PROTOCOL);
+	IPHeader.Source = PktUtil::Trace(PacketData + 12, SIZ_PROTOCOL);
+	IPHeader.Destination = PktUtil::Trace(PacketData + 16, SIZ_PROTOCOL);
 
 	Offset += sizeof(Packet::IP_HEADER);
 	switch (static_cast<Packet::IP_HEADER::IPProto>(IPHeader.Protocol))
@@ -257,6 +117,7 @@ L4: /* TCP/IP PktBegin 4 : Transport PktBegin { TCP }*/
 
 	Offset += (((TCPHeader.FHL >> 12) & 0x07) * 4);
 
+L5:
 	switch (static_cast<Packet::TCP_HEADER::Port>(TCPHeader.DstPort))
 	{
 	case Packet::TCP_HEADER::Port::HTTP:
@@ -289,7 +150,7 @@ TANGU_API void ARPSpoof::Reply(void)
 TANGU_API void ARPSpoof::Relay()
 {
 	BYTE Msg[1500];
-	PACKET_INFO CommonPacketHole;
+	PACKET_INFO CommonPacketHole(PacketData);
 
 	do
 	{
@@ -299,14 +160,14 @@ TANGU_API void ARPSpoof::Relay()
 			continue;
 		}
 
-		CommonPacketHole.PktParseData(PacketData, PKTBEGIN::LAYER_DATALINK);
-		if (Net::MACInfo{ CommonPacketHole.EthernetHeader.Source } == ARPFrame._Rsrc.MDst)
+		CommonPacketHole.ParseData(PKTBEGIN::LAYER_DATALINK);
+		if (Net::MACInfo(CommonPacketHole.EthernetHeader.Source) == ARPFrame._Rsrc.MDst)
 		{
-			if (Net::MACInfo{ CommonPacketHole.EthernetHeader.Destination } == ARPFrame._Rsrc.MSrc)
+			if (Net::MACInfo(CommonPacketHole.EthernetHeader.Destination) == ARPFrame._Rsrc.MSrc)
 			{
 				memcpy(Msg, PacketData, PacketHeader->len);
-				memcpy(Msg, *(Gateway.first), SIZ_HARDWARE);
-				memcpy(Msg + 6, *(ARPFrame._Rsrc.MSrc), SIZ_HARDWARE);
+				memcpy(Msg, (LPCBYTE) Gateway.first, SIZ_HARDWARE);
+				memcpy(Msg + 6, (LPCBYTE) ARPFrame._Rsrc.MSrc, SIZ_HARDWARE);
 
 				pcap_sendpacket(Interface, Msg, PacketHeader->len);
 			}
@@ -329,50 +190,38 @@ TANGU_API void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 
 #include <tangu\tangu_blocker.hpp>
 
-TANGU_API _BADURL_LIST::_BADURL_LIST(LPCSTR Txt_MalformedSite) :
-	UrlStream(Txt_MalformedSite, ios::in),
-	LogStream(LOGGER_PATH, ios::out)
+TANGU_API _BADURL_LIST::_BADURL_LIST(HANDLE _Device) :
+	WinDivertDev(_Device)
 {
-	assert(LogStream.is_open());
-
-	string Ban;
-	It = BlockedURL.before_begin();
-	while (UrlStream.good())
-	{
-		std::getline(UrlStream, Ban);
-
-		Algorithm::erase_all(Ban, "http://");
-
-#pragma warning(push)
-#pragma warning(disable : 4566)
-		//
-		// Algorithm::erase_all(Ban, L"\u...");
-		//
-#pragma warning(pop)
-
-		It = BlockedURL.insert_after(It, Ban);
-	}
-	UrlStream.close();
-
-	// 
-	// set timer.
-	//
-	time(&RawTime);
-	localtime_s(&TimeInfo, &RawTime);
 }
 TANGU_API _BADURL_LIST::~_BADURL_LIST(void)
 {
-	LogStream.close();
 }
-TANGU_API void _BADURL_LIST::LogAccess(void)
+TANGU_API void _BADURL_LIST::Hijack(PACKET_INFO& _PacketInfoRef)
 {
-	strftime(TimeBuf, sizeof(TimeBuf), "%d-%m-%Y %H-%M-%S", &TimeInfo);
+	if (this->Match((LPCSTR)_PacketInfoRef.ApplicationPayload))
+	{
+		HIJACK Hijack(_PacketInfoRef);
+		Hijack.Reset();
+		WinDivertDev.Send(_PacketInfoRef.PacketData, _PacketInfoRef.PacketLength);
+
+		Hijack.Block();
+		WinDivertDev.Send(_PacketInfoRef.PacketData, _PacketInfoRef.PacketLength);
+
+		Hijack.Finish();
+		WinDivertDev.Send(_PacketInfoRef.PacketData, _PacketInfoRef.PacketLength);
+	}
 }
-TANGU_API void _BADURL_LIST::Add(string URL)
+TANGU_API void _BADURL_LIST::Set(StringForwardList& _List)
 {
-	It = BlockedURL.insert_after(It, URL);
+	BlackList = _List;
+	BlackListIter = _List.end();
 }
-TANGU_API bool _BADURL_LIST::Match(LPSTR HTTPPayload)
+TANGU_API void _BADURL_LIST::Push(const string& _Url)
+{
+	BlackListIter = BlackList.insert_after(BlackListIter, _Url);
+}
+TANGU_API auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
 {
 	unordered_map<string, string> HTTPParsedInfo;
 	std::istringstream Resp{ HTTPPayload };
@@ -392,13 +241,10 @@ TANGU_API bool _BADURL_LIST::Match(LPSTR HTTPPayload)
 	{
 		if (Key.first == "Host")
 		{
-			for (auto& Lock : BlockedURL)
+			for (auto& Lock : BlackList)
 			{
 				if (Key.second.find(Lock) != string::npos)
 				{
-					LogAccess();
-					LogStream << TimeBuf << ' ' << Lock << std::endl << std::flush;
-
 					return false;
 				}
 			}
@@ -449,7 +295,8 @@ bool PacketGrouper::Reply(Packet::ICMP_ARCH::ICMPType Type, long long TimeLimit)
 			continue;
 		};
 
-		ICMPPacketHole.PktParseData(PacketData, PKTBEGIN::LAYER_DATALINK);
+		ICMPPacketHole = PacketData;
+		ICMPPacketHole.ParseData(PKTBEGIN::LAYER_DATALINK);
 		if (Net::IPInfo{ ICMPPacketHole.IPHeader.Source } == ICMPPacket._Rsrc.IDst)
 		{
 			if (static_cast<Packet::ICMP_ARCH::ICMPType>(ICMPPacketHole.ICMPPacket.Type) == Type)
@@ -486,7 +333,7 @@ PacketGrouper::STATISTICS& PacketGrouper::GetStats(void)
 
 #include <tangu\tangu_interface.hpp>
 
-TANGU_API PCAP_DEVICE::PCAP_DEVICE(bool(*IsMyDevice)(PPCAP_INTERFACE)) :
+TANGU_API PCAP_DEVICE::PCAP_DEVICE(std::function<bool(PPCAP_INTERFACE)>& IsMyDevice) :
 	DeviceNum(0)
 {
 	Status = pcap_findalldevs(&FirstDevice, Error);
@@ -548,105 +395,153 @@ TANGU_API void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
 	Interface = pcap_open_live(DeviceName, 65536, 1, 1000, Error);
 }
 
-TANGU_API bool IsMyDeviceWithAddress(PPCAP_INTERFACE Device)
-{
-	PPCAP_ADDRESS PcapAddress = Device->addresses;
-	ADDRESS_FAMILY AddressFamily = PcapAddress->addr->sa_family;
-	if (AF_INET == AddressFamily || AF_INET6 == AddressFamily)
-	{
-		if (PcapAddress->addr && PcapAddress->netmask)
-		{
-			Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
-			if (Net::Utility::GetIPAddress(AddressInfo) ==
-				Net::IPInfo(((struct sockaddr_in*)(PcapAddress->addr))->sin_addr.s_addr))
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-TANGU_API bool IsMyDeviceWithDescription(PPCAP_INTERFACE Device)
-{
-	return string(Device->description) == "Microsoft" ? true : false;
-}
 
 
-TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR Filter) :
-	PacketLen(0)
+#include <tangu\tangu_divert.hpp>
+
+TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
+	ReadPacketLength(0),
+	WrittenPacketLength(0)
 {
-	HDivertDev = WinDivertOpen(Filter,
+	DivertDevice = WinDivertOpen(_Filter,
 		WINDIVERT_LAYER::WINDIVERT_LAYER_NETWORK,
 		0,
 		0);
 
 	DWORD Errno = GetLastError();
-	if (INVALID_HANDLE_VALUE == HDivertDev &&
+	if (INVALID_HANDLE_VALUE == DivertDevice &&
 		ERROR_SUCCESS != Errno)
 	{
-		switch (Errno)
+		ThrowExcpetions(Errno);
+	}
+}
+TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(HANDLE _Device) :
+	DivertDevice(_Device)
+{
+}
+TANGU_API WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
+{
+	if (nullptr != DivertDevice)
+	{
+		if (FALSE == WinDivertClose(DivertDevice))
 		{
-		case ERROR_FILE_NOT_FOUND:
-			throw ErrorFileNotFoundException();
-
-		case ERROR_ACCESS_DENIED:
-			throw ErrorAccessDeniedException();
-
-		case ERROR_INVALID_PARAMETER:
-			throw ErrorInvalidParameterException();
-
-		case ERROR_INVALID_IMAGE_HASH:
-			throw ErrorInvalidImageHashException();
-
-		case ERROR_DRIVER_BLOCKED:
-			throw ErrorDriverBlockedException();
-
-		default:
 			throw Win32Exception::FromLastError();
 		}
 	}
 }
-TANGU_API WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
+TANGU_API	void WINDIVERT_DEVICE::ThrowExcpetions(DWORD Errno)
 {
-	if (nullptr != HDivertDev)
+	// Refered to http://reqrt.org/windivert-faq.html 
+
+	switch (Errno)
 	{
-		WinDivertClose(HDivertDev);
+		//
+		// DivertOpen() fail 
+		//
+
+	case ERROR_FILE_NOT_FOUND:
+		// Either one of the WinDivert32.sys or WinDivert64.sys files were not found. 
+		throw ErrorFileNotFoundException();
+
+	case ERROR_ACCESS_DENIED:
+		// The calling application does not have Administrator privileges. 
+		throw ErrorAccessDeniedException();
+
+	case ERROR_INVALID_PARAMETER:
+		// This indicates an invalid packet filter string, layer, priority, or flags.
+		throw ErrorInvalidParameterException();
+
+	case ERROR_OPEN_FAILED:
+		// Only older versions (< 1.0.3) of WinDivert return (110) errors. Please upgrade to the latest version. 
+		throw ErrorOpenFailedException();
+
+	case ERROR_PROC_NOT_FOUND:
+		// The error may occur for Windows Vista users. The solution is to install the following patch from Microsoft: 
+		// http://support.microsoft.com/kb/2761494. 
+		throw ErrorProcNotFoundException();
+
+	case ERROR_INVALID_IMAGE_HASH:
+		// The WinDivert32.sys or WinDivert64.sys driver file does not have a valid digital signature. 
+		throw ErrorInvalidImageHashException();
+
+	case ERROR_DRIVER_BLOCKED:
+		// This error occurs for various reasons, including: 
+		// * attempting to load the 32 - bit WinDivert.sys driver on a 64 - bit system(or vice versa);
+		// * the WinDivert.sys driver is blocked by security software; or
+		//	* you are using a virtualization environment that does not support drivers.
+		throw ErrorDriverBlockedException();
+
+		//
+		// DivertSend() fail
+		//
+	case ERROR_DATA_NOT_ACCEPTED:
+		// This error is returned when the user application attempts to inject a malformed packet. 
+		// It may also be returned for valid inbound packets, and the Windows TCP/IP stack rejects the packet for some reason. 
+		throw ErrorDataNotAcceptedException();
+
+	case ERROR_RETRY:
+		// The underlying cause of this error is unknown. However, this error usually occurs when certain kinds of anti-virus/
+		// firewall/security software is installed, and the error message usually resolves once the offending program is uninstalled. 
+		// This suggests a software compatibility problem. 
+		throw ErrorRetryException();
+
+	default:
+		throw Win32Exception::FromWinError(Errno);
 	}
 }
-TANGU_API const LPBYTE WINDIVERT_DEVICE::Receive(void)
+TANGU_API void WINDIVERT_DEVICE::Receive(void)
 {
-	if (TRUE != WinDivertRecv(HDivertDev,
+	BOOL RecvSuccess = WinDivertRecv(DivertDevice,
 		Payload,
 		sizeof(Payload),
-		&PAddr,
-		&ReadLen))
-	{
-		throw ErrorReadFaultException();
-	}
+		&Address,
+		&ReadPacketLength);
 
-	return Payload;
+	if (TRUE != RecvSuccess)
+	{
+		throw Win32Exception::FromLastError();
+	}
 }
-TANGU_API const LPBYTE WINDIVERT_DEVICE::Send(void)
+TANGU_API void WINDIVERT_DEVICE::Send(void)
 {
-	if (TRUE != WinDivertSend(HDivertDev,
+	BOOL SendSuccess = WinDivertSend(DivertDevice,
 		Payload,
-		ReadLen,
-		&PAddr,
-		nullptr))
+		ReadPacketLength,
+		&Address,
+		&WrittenPacketLength);
+	if (ReadPacketLength != WrittenPacketLength)
 	{
-		throw ErrorWriteFaultException();
+		SendSuccess = FALSE;
 	}
 
-	return Payload;
+	if (TRUE != SendSuccess)
+	{
+		throw Win32Exception::FromLastError();
+	}
 }
-TANGU_API const LPBYTE WINDIVERT_DEVICE::ReceiveAndSend(void)
+TANGU_API void WINDIVERT_DEVICE::Send(LPCBYTE _Payload, UINT _Length)
 {
-	this->Receive();
-	return this->Send();
+	BOOL SendSuccess = WinDivertSend(DivertDevice,
+		(PVOID) _Payload,
+		_Length,
+		&Address,
+		&WrittenPacketLength);
+
+	if (TRUE != SendSuccess)
+	{
+		throw Win32Exception::FromLastError();
+	}
 }
+
+
+
+#include <tangu\tangu_exception.hpp>
 
 Win32Exception::Win32Exception(DWORD Errno) :
-	ErrorCode(Errno)
+	_ErrorCode(Errno)
+{
+}
+ Win32Exception::~Win32Exception(void)
 {
 }
 std::exception_ptr Win32Exception::FromLastError(void) noexcept
@@ -655,57 +550,87 @@ std::exception_ptr Win32Exception::FromLastError(void) noexcept
 }
 std::exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept
 {
-	using std::make_exception_ptr;
+	Win32Exception* Exception;
 	switch (Errno)
 	{
 	case ERROR_SUCCESS:
-		return make_exception_ptr(ErrorSuccessException());
+	{
+		Exception = new ErrorSuccessException();
+	}
+	esac
 
 	case ERROR_INVALID_FUNCTION:
-		return make_exception_ptr(ErrorInvalidFunctionException());
+	{
+		Exception = new ErrorInvalidFunctionException();
+	}
+	esac
 
 	case ERROR_FILE_NOT_FOUND:
-		return make_exception_ptr(ErrorFileNotFoundException());
+	{
+		Exception = new ErrorFileNotFoundException();
+	}
+	esac
 
 	case ERROR_PATH_NOT_FOUND:
-		return make_exception_ptr(ErrorPathNotFoundException());
-
-	case ERROR_TOO_MANY_OPEN_FILES:
-		return make_exception_ptr(ErrorTooManyOpenFilesException());
+	{
+		Exception = new ErrorPathNotFoundException();
+	}
+	esac
 
 	case ERROR_ACCESS_DENIED:
-		return make_exception_ptr(ErrorAccessDeniedException());
+	{
+		Exception = new ErrorAccessDeniedException();
+	}
+	esac
 
 	case ERROR_INVALID_HANDLE:
-		return make_exception_ptr(ErrorInvalidHandleException());
+	{
+		Exception = new ErrorInvalidHandleException();
+	}
+	esac
 
-	case ERROR_ALREADY_EXISTS:
-		return make_exception_ptr(ErrorAlreadyExistsException());
+	case ERROR_READ_FAULT:
+	{
+		Exception = new ErrorReadFaultException();
+	}
+	esac
+
+	case ERROR_WRITE_FAULT:
+	{
+		Exception = new ErrorWriteFaultException();
+	}
+	esac
 
 	case ERROR_INVALID_PARAMETER:
-		return make_exception_ptr(ErrorInvalidParameterException());
+	{
+		Exception = new ErrorInvalidParameterException();
+	}
+	esac
 
-	case ERROR_MOD_NOT_FOUND:
-		return make_exception_ptr(ErrorModuleNotFoundException());
-
-	case ERROR_PROC_NOT_FOUND:
-		return make_exception_ptr(ErrorProcedureNotFoundException());
+	case ERROR_ALREADY_EXISTS:
+	{
+		Exception = new ErrorAlreadyExistsException();
+	}
+	esac
 
 	default:
-		return make_exception_ptr(Win32Exception(Errno));
+		Exception = new Win32Exception(Errno);
 	}
+
+	return std::make_exception_ptr(Exception);
 }
-void _declspec(noreturn) Win32Exception::Throw(DWORD LastError)
+void _declspec(noreturn) Win32Exception::Throw(DWORD WinErrno)
 {
-	std::rethrow_exception(FromWinError(LastError));
+	std::rethrow_exception(FromWinError(WinErrno));
 }
 void _declspec(noreturn) Win32Exception::ThrowFromLastError(void)
 {
 	Throw(::GetLastError());
 }
-DWORD Win32Exception::GetErrorCode(void) const
+
+DWORD Win32Exception::get(void) const
 {
-	return ErrorCode;
+	return _ErrorCode;
 }
 LPCSTR Win32Exception::what(void) const
 {
@@ -715,7 +640,7 @@ LPCSTR Win32Exception::what(void) const
 		FORMAT_MESSAGE_IGNORE_INSERTS;
 	DWORD dwLanguage = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
 
-	if (!FormatMessageA(dwFormat, NULL, ErrorCode, dwLanguage,
+	if (!FormatMessageA(dwFormat, NULL, _ErrorCode, dwLanguage,
 		(LPSTR)&lpMassage, 0, NULL))
 	{
 		return nullptr;

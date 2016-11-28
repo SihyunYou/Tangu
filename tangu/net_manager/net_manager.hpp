@@ -2,34 +2,35 @@
 #ifndef _NETMANAGE_H
 #define _NETMANAGE_H
 
+#include <net_manager\net_manager_exception.hpp>
 #include <net_manager\net_manager_ip.hpp>
 #include <net_manager\net_manager_link.hpp>
 
 NAMESPACE_BEGIN(Net)
 
-typedef struct DATALINK_LAYER
+typedef struct DATALINK_IDENTIFIER
 {
-	MACInfo		MDst;
-	MACInfo		MSrc;
-} L2, *PL2;
-typedef struct NETWORK_LAYER
+	MACInfo MDst;
+	MACInfo MSrc;
+} L2ID, *PL2ID;
+typedef struct NETWORK_IDENTIFIER
 {
-	MACInfo		MDst;
-	MACInfo		MSrc;
-	IPInfo			ISrc;
-	IPInfo			IDst;
-}L3, *PL3;
-typedef struct TRANSPORT_LAYER
+	MACInfo MDst;
+	MACInfo MSrc;
+	IPInfo ISrc;
+	IPInfo IDst;
+}L3ID, *PL3ID;
+typedef struct TRANSPORT_IDENTIFIER
 {
-	MACInfo		MDst;
-	MACInfo		MSrc;
-	IPInfo			ISrc;
-	IPInfo			IDst;
-}L4, *PL4;
+	MACInfo MDst;
+	MACInfo MSrc;
+	IPInfo ISrc;
+	IPInfo IDst;
+	UINT PSrc;
+	UINT PDst;
+}L4ID, *PL4ID;
 
-TANGU_API bool _cdecl CompareSubnetMask(PIP_ADAPTER_INFO);
-TANGU_API bool _cdecl CompareDescription(PIP_ADAPTER_INFO);
-TANGU_API bool _cdecl CompareARP(PMIB_IPNETROW);
+
 typedef class TANGU_API IPAdapterInfo
 {
 private:
@@ -50,8 +51,9 @@ public:
 
 public:
 	PIP_ADAPTER_INFO operator()(void);
-	PIP_ADAPTER_INFO GetNode(bool(_cdecl *FuncCompare)(PIP_ADAPTER_INFO));
+	PIP_ADAPTER_INFO GetNode(std::function<bool(PIP_ADAPTER_INFO)>);
 } *PIPAdapterInfo;
+
 typedef class TANGU_API IPNetTableInfo
 {
 private:
@@ -78,7 +80,7 @@ public:
 
 public:
 	PMIB_IPNETTABLE IPNetTableInfo::GetTable(void);
-	PMIB_IPNETROW IPNetTableInfo::GetNode(bool(_cdecl *FuncCompare)(PMIB_IPNETROW));
+	PMIB_IPNETROW IPNetTableInfo::GetNode(std::function<bool(PMIB_IPNETROW)>);
 }*PIPNetTableInfo;
 
 class TANGU_API Utility

@@ -31,6 +31,19 @@ using _STD vector;
 using _STD forward_list;
 using _STD unordered_map;
 
+//
+// Smart pointers.
+//
+#include <Memory>
+using _STD shared_ptr;
+using _STD unique_ptr;
+
+//
+// Lambda functions.
+//
+#include <Functional>
+using _STD function;
+
 #include <String>
 using _STD string;
 using _STD wstring;
@@ -68,6 +81,8 @@ using namespace _STD chrono;
 #define WIN32_LEAN_AND_MEAN
 
 #include <Windows.h>
+
+typedef const unsigned char* LPCBYTE;
 
 //
 // Prevent redefinition of WinSock2.h header, Windows.h header.
@@ -149,4 +164,19 @@ using namespace _STD chrono;
 #define NAMESPACE_BEGIN(var) namespace var##{
 #define NAMESPACE_END }
 
+//
+// Thread utils.
+//
+__forceinline bool sleep_for(DWORD milliseconds, unsigned time = 1)
+{
+	Sleep(milliseconds * time);
+	return true;
+}
+
+#pragma pack(push)
+#pragma warning(disable : 4005)
+#define sleep_for(x) ::sleep_for(x)
+#define sleep_for(x, t) ::sleep_for(x, t) 
+
+#pragma pack(pop)
 #endif /* _TANGU */

@@ -32,16 +32,16 @@ protected:
 				continue;
 			}
 
-			ARPReplyHole.PktParseData(PacketData, PKTBEGIN::LAYER_DATALINK);
+			ARPReplyHole.ParseData(PKTBEGIN::LAYER_DATALINK);
 			if (UCast(16)(Packet::ETHERNET_HEADER::EthernetType::ARP)
 				== ARPReplyHole.EthernetHeader.Type)
 			{
-				if ( static_cast<USHORT>(Packet::ARP_ARCH::Opcode::REPLY) !=
+				if (static_cast<USHORT>(Packet::ARP_ARCH::Opcode::REPLY) !=
 					ARPReplyHole.ARPFrame.Operation)
 				{
 					continue;
 				}
-				if (!memcmp(ARPReplyHole.ARPFrame.SenderIP, *TargetSpoof, 4))
+				if (Net::IPInfo{ ARPReplyHole.ARPFrame.SenderIP } == TargetSpoof)
 				{
 					SuccessReceived = true;
 					break;

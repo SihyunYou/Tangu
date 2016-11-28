@@ -11,6 +11,7 @@ enum class PKTBEGIN
 	LAYER_DATALINK,
 	LAYER_NETWORK,
 	LAYER_TRANSPORT,
+	LAYER_APPLICATION
 };
 
 typedef struct TANGU_API _PCAPTOOL
@@ -27,6 +28,10 @@ protected:
 
 typedef class TANGU_API PACKET_INFO
 {
+public:
+	LPCBYTE PacketData;
+	UINT PacketLength;
+
 public:
 	//
 	// Layer 2
@@ -45,15 +50,19 @@ public:
 	Packet::ICMP_ARCH ICMPPacket;
 	Packet::TCP_HEADER TCPHeader;
 
-	LPBYTE ApplicationPayload;
+	BYTE ApplicationPayload[_MAX_ETHERNETLEN 
+		- sizeof(Packet::ETHERNET_HEADER) 
+		- sizeof(Packet::IP_HEADER) 
+		- sizeof(Packet::TCP_HEADER)];
+	UINT PayloadLength;
 
 public:
 	PACKET_INFO::PACKET_INFO(void);
+	PACKET_INFO::PACKET_INFO(LPCBYTE);
 
 public:
-	string PACKET_INFO::PktParseString(const LPBYTE, PKTBEGIN = PKTBEGIN::LAYER_DATALINK);
-	void PACKET_INFO::PktParseData(const LPBYTE, PKTBEGIN = PKTBEGIN::LAYER_DATALINK);
-} *PPCAKET_INFO;
+	void PACKET_INFO::ParseData(PKTBEGIN = PKTBEGIN::LAYER_DATALINK);
+} *PPACKET_INFO;
 
 
 #endif /* _ANALYZER */

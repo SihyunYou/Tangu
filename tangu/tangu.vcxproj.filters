@@ -25,6 +25,9 @@
     <Filter Include="Header Files\tangu\application">
       <UniqueIdentifier>{24bde203-54bd-4a71-8b3d-e7e0433a7a53}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\tangu\base">
+      <UniqueIdentifier>{7a47082f-9711-4512-a5f3-0085f6df32ef}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="net_manager\net_manager_link.hpp">
@@ -54,12 +57,6 @@
     <ClInclude Include="packet_field\packet_field_tcp.hpp">
       <Filter>Header Files\packet_field</Filter>
     </ClInclude>
-    <ClInclude Include="tangu\tangu_build.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
-    <ClInclude Include="tangu\tangu_interface.hpp">
-      <Filter>Header Files\tangu</Filter>
-    </ClInclude>
     <ClInclude Include="tangu\tangu_analyzer.hpp">
       <Filter>Header Files\tangu\application</Filter>
     </ClInclude>
@@ -72,8 +69,20 @@
     <ClInclude Include="tangu\tangu_ping.hpp">
       <Filter>Header Files\tangu\application</Filter>
     </ClInclude>
-    <ClInclude Include="tangu_tunnel.h">
-      <Filter>Header Files\tangu\application</Filter>
+    <ClInclude Include="net_manager\net_manager_exception.hpp">
+      <Filter>Header Files\net_manager</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_build.hpp">
+      <Filter>Header Files\tangu\base</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_divert.hpp">
+      <Filter>Header Files\tangu\base</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_exception.hpp">
+      <Filter>Header Files\tangu\base</Filter>
+    </ClInclude>
+    <ClInclude Include="tangu\tangu_interface.hpp">
+      <Filter>Header Files\tangu\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

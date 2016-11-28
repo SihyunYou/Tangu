@@ -81,13 +81,11 @@ typedef struct _IP_HEADER
 
 	USHORT Checksum;
 
-	BYTE Source[4];
-	BYTE Destination[4];
+	UINT Source;
+	UINT Destination;
 
 } IP_HEADER, *PIP_HEADER;
 #pragma pack(pop)
-
-TANGU_API USHORT IPCheckSum(Packet::PIP_HEADER);
 
 NAMESPACE_END /* Packet */
 

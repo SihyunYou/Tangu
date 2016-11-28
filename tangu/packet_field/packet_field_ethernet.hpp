@@ -12,8 +12,8 @@ NAMESPACE_BEGIN(Packet)
 typedef struct _ETHERNET_HEADER
 {
 
-	BYTE Destination[6];
-	BYTE Source[6];
+	UINT64 Destination : 48;
+	UINT64 Source : 48;
 
 	enum class EthernetType
 	{
@@ -32,9 +32,9 @@ typedef struct _ETHERNET_HEADER
 
 		VLAN = 0x8100,
 	};
-	USHORT Type;
+	UINT16 Type;
 
-} ETHERNET_HEADER, *PETHERNET_HEADER;
+} ETHERNET_HEADER, *PETHERNET_HEADER, &RETHERNET_HEADER;
 #pragma pack(pop)
 
 NAMESPACE_END /* Packet */
