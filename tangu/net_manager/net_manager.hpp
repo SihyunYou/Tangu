@@ -54,6 +54,7 @@ public:
 	PIP_ADAPTER_INFO GetNode(std::function<bool(PIP_ADAPTER_INFO)>);
 } *PIPAdapterInfo;
 
+
 typedef class TANGU_API IPNetTableInfo
 {
 private:
@@ -83,13 +84,14 @@ public:
 	PMIB_IPNETROW IPNetTableInfo::GetNode(std::function<bool(PMIB_IPNETROW)>);
 }*PIPNetTableInfo;
 
+
 class TANGU_API Utility
 {
 public:
-	static MACInfo Utility::GetMACAddress(PIPAdapterInfo);
-	static MACInfo Utility::GetGatewayMACAddress(PIPNetTableInfo);
-	static IPInfo Utility::GetIPAddress(PIPAdapterInfo);
-	static IPInfo Utility::GetGatewayIPAddress(PIPAdapterInfo);
+	MACInfo static Utility::GetMACAddress(PIPAdapterInfo);
+	MACInfo static Utility::GetGatewayMACAddress(PIPNetTableInfo);
+	IPInfo static Utility::GetIPAddress(PIPAdapterInfo);
+	IPInfo static Utility::GetGatewayIPAddress(PIPAdapterInfo);
 };
 
 NAMESPACE_END

@@ -3,7 +3,7 @@
 
 namespace Packet /* packet_field.hpp # class Utility */
 {
-	TANGU_API unsigned __int64 __forceinline Utility::Trace(LPCBYTE Data, UINT Length)
+	unsigned __int64 __forceinline Utility::Trace(LPCBYTE Data, UINT Length)
 	{
 		if (Length > sizeof(long long))
 		{
@@ -39,7 +39,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 			return Decimal;
 		}
 	}
-	TANGU_API void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
+	void Utility::CustomPermutate(string& Content, LPCSTR Format, ...)
 	{
 		CHAR FormatBuf[FORMAT_MESSAGE_ALLOCATE_BUFFER];
 		va_list Marker;
@@ -50,7 +50,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 		Content += FormatBuf;
 	}
 
-	TANGU_API unsigned __int16 Utility::IPCheckSum(PIP_HEADER IPHdrBuf)
+	unsigned __int16 Utility::IPCheckSum(PIP_HEADER IPHdrBuf)
 	{
 		unsigned __int8* Buf = (unsigned __int8*)IPHdrBuf;
 		unsigned __int32 Sum{ 0 };
@@ -66,7 +66,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 
 		return  ~((unsigned __int16)Sum & 0xFFFF);
 	}
-	TANGU_API unsigned __int16 Utility::ICMPCheckSum(PICMP_ARCH UchkdICMP)
+	unsigned __int16 Utility::ICMPCheckSum(PICMP_ARCH UchkdICMP)
 	{
 		unsigned __int8* Buf = (unsigned __int8*)UchkdICMP;
 		unsigned __int32 Sum{ 0 };
@@ -82,7 +82,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 
 		return ~((unsigned __int16)Sum & 0xFFFF);
 	}
-	TANGU_API unsigned __int16 Utility::TCPCheckSum(PIP_HEADER IPHdrBuf, PTCP_HEADER TCPHdrBuf)
+	unsigned __int16 Utility::TCPCheckSum(PIP_HEADER IPHdrBuf, PTCP_HEADER TCPHdrBuf)
 	{
 		unsigned __int16* Buf{ (unsigned short *)TCPHdrBuf };
 		unsigned short PayloadLen{ ntohs(IPHdrBuf->TotalLength) - sizeof(IP_HEADER) };
@@ -116,7 +116,7 @@ namespace Packet /* packet_field.hpp # class Utility */
 
 namespace Packet /* packet_field_arp.hpp # class __ARP */
 {
-	TANGU_API __ARP::__ARP(void)
+	__ARP::__ARP(void)
 	{
 		Net::PIPAdapterInfo AddressInfo = Net::IPAdapterInfo::GetInstance();
 
@@ -124,7 +124,7 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 		_Rsrc.MSrc = NetUtil::GetMACAddress(AddressInfo);
 	}
 
-	TANGU_API void __ARP::GetARP(ARP_ARCHITECT::Opcode Operation)
+	void __ARP::GetARP(ARP_ARCHITECT::Opcode Operation)
 	{
 		if (Operation == ARP_ARCH::Opcode::REQUEST)
 		{
@@ -159,7 +159,7 @@ namespace Packet /* packet_field_arp.hpp # class __ARP */
 
 namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 {
-	TANGU_API __ICMP::__ICMP(void)
+	__ICMP::__ICMP(void)
 		: Seed(RdFromHW()), Distributer(0, 0xFF00)
 	{
 		Net::IPAdapterInfo* AddressInfo = Net::IPAdapterInfo::GetInstance();
@@ -171,7 +171,7 @@ namespace Packet /* packet_field_icmp.hpp # class __ICMP */
 		Seq = static_cast<USHORT>(Distributer(Seed));
 	}
 
-	TANGU_API void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
+	void __ICMP::GetICMP(ICMP_ARCH::ICMPType ControlMessage)
 	{
 		/* L2 { Data Link Layer } : Ethernet */
 		EthernetHeader.Destination = (UINT64) _Rsrc.MDst;

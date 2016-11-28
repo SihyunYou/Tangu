@@ -18,6 +18,8 @@
 using _STD pair;
 using _STD make_pair;
 
+using _STD exception_ptr;
+
 //
 // Standard template libraries for tangu packet structures.
 //

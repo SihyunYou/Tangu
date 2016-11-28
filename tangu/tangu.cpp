@@ -1,21 +1,28 @@
 ﻿#pragma once
 #include <tangu\tangu_analyzer.hpp>
+#include <tangu\tangu_spoof.hpp>
+#include <tangu\tangu_blocker.hpp>
+#include <tangu\tangu_ping.hpp>
+#include <tangu\tangu_interface.hpp>
+#include <tangu\tangu_divert.hpp>
+#include <tangu\tangu_exception.hpp>
 
-TANGU_API _PCAPTOOL::_PCAPTOOL(void) :
+//
+// tangu.cpp : implementation of the PACKET_INFO class.
+
+_PCAPTOOL::_PCAPTOOL(void) :
 	PacketData(nullptr)
 {
-
 }
-TANGU_API _PCAPTOOL::_PCAPTOOL(PPCAP PcapInterface) :
+_PCAPTOOL::_PCAPTOOL(PPCAP PcapInterface) :
 	Interface(PcapInterface), PacketData(nullptr)
 {
-
 }
-TANGU_API PACKET_INFO::PACKET_INFO(void) :
+PACKET_INFO::PACKET_INFO(void) :
 	PacketData(nullptr)
 {
 }
-TANGU_API PACKET_INFO::PACKET_INFO(LPCBYTE _PacketData) : 
+PACKET_INFO::PACKET_INFO(LPCBYTE _PacketData) : 
 	PacketData(_PacketData)
 {
 }
@@ -129,9 +136,11 @@ Exit:
 }
 
 
-#include <tangu\tangu_spoof.hpp>
 
-TANGU_API ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
+//
+// tangu.cpp : implementation of the ARPSpoof class.
+
+ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
 {
 	Net::IPAdapterInfo* AddressInfo = Net::IPAdapterInfo::GetInstance();
 
@@ -142,12 +151,12 @@ TANGU_API ARPSpoof::ARPSpoof(PPCAP* Interface, Net::IPInfo Target)
 	ARPFrame._Rsrc.IDst = Target;
 	ARPFrame._Rsrc.MDst = GetMACAddress(ARPFrame._Rsrc.IDst, 30.0);
 }
-TANGU_API void ARPSpoof::Reply(void)
+void ARPSpoof::Reply(void)
 {
 	ARPFrame._Rsrc.ISrc = Gateway.second;
 	GenerateARP(Packet::ARP_ARCH::Opcode::REPLY);
 }
-TANGU_API void ARPSpoof::Relay()
+void ARPSpoof::Relay()
 {
 	BYTE Msg[1500];
 	PACKET_INFO CommonPacketHole(PacketData);
@@ -174,11 +183,11 @@ TANGU_API void ARPSpoof::Relay()
 		}
 	} while (Ret >= 0);
 }
-TANGU_API bool ARPSpoof::IsARPValid()
+bool ARPSpoof::IsARPValid()
 {
 	return SuccessReceived;
 }
-TANGU_API void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
+void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 {
 	ARPFrame.GetARP(Operation);
 	pcap_sendpacket(Interface,
@@ -188,16 +197,17 @@ TANGU_API void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 
 
 
-#include <tangu\tangu_blocker.hpp>
+//
+// tangu.cpp : implementation of the BADURL_LIST class.
 
-TANGU_API _BADURL_LIST::_BADURL_LIST(HANDLE _Device) :
+_BADURL_LIST::_BADURL_LIST(HANDLE _Device) :
 	WinDivertDev(_Device)
 {
 }
-TANGU_API _BADURL_LIST::~_BADURL_LIST(void)
+_BADURL_LIST::~_BADURL_LIST(void)
 {
 }
-TANGU_API void _BADURL_LIST::Hijack(PACKET_INFO& _PacketInfoRef)
+void _BADURL_LIST::Hijack(PACKET_INFO& _PacketInfoRef)
 {
 	if (this->Match((LPCSTR)_PacketInfoRef.ApplicationPayload))
 	{
@@ -212,16 +222,16 @@ TANGU_API void _BADURL_LIST::Hijack(PACKET_INFO& _PacketInfoRef)
 		WinDivertDev.Send(_PacketInfoRef.PacketData, _PacketInfoRef.PacketLength);
 	}
 }
-TANGU_API void _BADURL_LIST::Set(StringForwardList& _List)
+void _BADURL_LIST::Set(StringForwardList& _List)
 {
 	BlackList = _List;
 	BlackListIter = _List.end();
 }
-TANGU_API void _BADURL_LIST::Push(const string& _Url)
+void _BADURL_LIST::Push(const string& _Url)
 {
 	BlackListIter = BlackList.insert_after(BlackListIter, _Url);
 }
-TANGU_API auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
+auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
 {
 	unordered_map<string, string> HTTPParsedInfo;
 	std::istringstream Resp{ HTTPPayload };
@@ -256,7 +266,8 @@ TANGU_API auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
 
 
 
-#include <tangu\tangu_ping.hpp>
+//
+// tangu.cpp : implementation of the PacketGrouper class.
 
 long long _TIME_POINT::operator()(void)
 {
@@ -275,7 +286,6 @@ PacketGrouper::PacketGrouper(PPCAP* Interface, Net::IPInfo Target) :
 	ICMPPacket._Rsrc.MSrc = Net::Utility::GetMACAddress(AddressInfo);
 	ICMPPacket._Rsrc.MDst = Net::Utility::GetGatewayMACAddress(NetTableInfo);
 }
-
 void PacketGrouper::Request(Packet::ICMP_ARCH::ICMPType Type)
 {
 	ICMPPacket.GetICMP(Type);
@@ -331,9 +341,10 @@ PacketGrouper::STATISTICS& PacketGrouper::GetStats(void)
 
 
 
-#include <tangu\tangu_interface.hpp>
+//
+// tangu.cpp : implementation of the PCAP_DEVICE class.
 
-TANGU_API PCAP_DEVICE::PCAP_DEVICE(std::function<bool(PPCAP_INTERFACE)>& IsMyDevice) :
+PCAP_DEVICE::PCAP_DEVICE(std::function<bool(PPCAP_INTERFACE)>& IsMyDevice) :
 	DeviceNum(0)
 {
 	Status = pcap_findalldevs(&FirstDevice, Error);
@@ -357,7 +368,7 @@ TANGU_API PCAP_DEVICE::PCAP_DEVICE(std::function<bool(PPCAP_INTERFACE)>& IsMyDev
 PCAP_DEVICE_FAILED:
 	;
 }
-TANGU_API PCAP_DEVICE::PCAP_DEVICE(void)
+PCAP_DEVICE::PCAP_DEVICE(void)
 {
 	DeviceChar = pcap_lookupdev(Error);
 	if (nullptr == DeviceChar)
@@ -382,7 +393,7 @@ TANGU_API PCAP_DEVICE::PCAP_DEVICE(void)
 PCAP_DEVICE_FAILED:
 	;
 }
-TANGU_API PCAP_DEVICE::~PCAP_DEVICE(void)
+PCAP_DEVICE::~PCAP_DEVICE(void)
 {
 	if (nullptr != FirstDevice)
 	{
@@ -390,16 +401,17 @@ TANGU_API PCAP_DEVICE::~PCAP_DEVICE(void)
 	}
 	pcap_close(Interface);
 }
-TANGU_API void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
+void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
 {
 	Interface = pcap_open_live(DeviceName, 65536, 1, 1000, Error);
 }
 
 
 
-#include <tangu\tangu_divert.hpp>
+//
+// tangu.cpp : implementation of the WINDIVERT_DEVICE class.
 
-TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
+WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
 	ReadPacketLength(0),
 	WrittenPacketLength(0)
 {
@@ -415,11 +427,11 @@ TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
 		ThrowExcpetions(Errno);
 	}
 }
-TANGU_API WINDIVERT_DEVICE::WINDIVERT_DEVICE(HANDLE _Device) :
+WINDIVERT_DEVICE::WINDIVERT_DEVICE(HANDLE _Device) :
 	DivertDevice(_Device)
 {
 }
-TANGU_API WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
+WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
 {
 	if (nullptr != DivertDevice)
 	{
@@ -489,7 +501,7 @@ TANGU_API	void WINDIVERT_DEVICE::ThrowExcpetions(DWORD Errno)
 		throw Win32Exception::FromWinError(Errno);
 	}
 }
-TANGU_API void WINDIVERT_DEVICE::Receive(void)
+void WINDIVERT_DEVICE::Receive(void)
 {
 	BOOL RecvSuccess = WinDivertRecv(DivertDevice,
 		Payload,
@@ -502,7 +514,7 @@ TANGU_API void WINDIVERT_DEVICE::Receive(void)
 		throw Win32Exception::FromLastError();
 	}
 }
-TANGU_API void WINDIVERT_DEVICE::Send(void)
+void WINDIVERT_DEVICE::Send(void)
 {
 	BOOL SendSuccess = WinDivertSend(DivertDevice,
 		Payload,
@@ -519,7 +531,7 @@ TANGU_API void WINDIVERT_DEVICE::Send(void)
 		throw Win32Exception::FromLastError();
 	}
 }
-TANGU_API void WINDIVERT_DEVICE::Send(LPCBYTE _Payload, UINT _Length)
+void WINDIVERT_DEVICE::Send(LPCBYTE _Payload, UINT _Length)
 {
 	BOOL SendSuccess = WinDivertSend(DivertDevice,
 		(PVOID) _Payload,
@@ -535,7 +547,8 @@ TANGU_API void WINDIVERT_DEVICE::Send(LPCBYTE _Payload, UINT _Length)
 
 
 
-#include <tangu\tangu_exception.hpp>
+//
+// tangu.cpp : implementation of the Win32Exception class.
 
 Win32Exception::Win32Exception(DWORD Errno) :
 	_ErrorCode(Errno)
@@ -627,7 +640,6 @@ void _declspec(noreturn) Win32Exception::ThrowFromLastError(void)
 {
 	Throw(::GetLastError());
 }
-
 DWORD Win32Exception::get(void) const
 {
 	return _ErrorCode;

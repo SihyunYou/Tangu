@@ -22,13 +22,14 @@ public:
 	virtual NetException::~NetException(void);
 
 public:
-	static std::exception_ptr NetException::FromNetError(NET_ERROR) noexcept;
-	static void _declspec(noreturn) NetException::Throw(NET_ERROR);
+	exception_ptr static NetException::FromNetError(NET_ERROR) noexcept;
+	void static _declspec(noreturn) NetException::Throw(NET_ERROR);
 
 public:
 	DWORD NetException::get(void) const;
 	virtual LPCSTR NetException::what(void) const;
 };
+
 
 class ErrorPassException : public NetException
 {
