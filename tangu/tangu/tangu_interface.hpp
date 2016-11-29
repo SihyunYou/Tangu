@@ -1,3 +1,9 @@
+﻿//
+// tangu_interface.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #ifndef _TANGU_INTERFACE
 #define _TANGU_INTERFACE

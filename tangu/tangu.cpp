@@ -1,4 +1,10 @@
-﻿#pragma once
+﻿//
+// tangu.cpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
+#pragma once
 #include <tangu\tangu_analyzer.hpp>
 #include <tangu\tangu_spoof.hpp>
 #include <tangu\tangu_blocker.hpp>

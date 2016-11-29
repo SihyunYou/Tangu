@@ -1,3 +1,9 @@
+﻿//
+// net_manager_link.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #ifndef _NETMANAGER_LINK
 #define _NETMANAGER_LINK

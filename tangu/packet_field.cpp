@@ -1,3 +1,9 @@
+﻿//
+// packet_field.cpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #include <packet_field\packet_field.hpp>
 

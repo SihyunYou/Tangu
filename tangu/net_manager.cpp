@@ -1,3 +1,9 @@
+﻿//
+// net_manager.cpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #include <net_manager\net_manager.hpp>
 

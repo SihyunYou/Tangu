@@ -1,3 +1,9 @@
+﻿//
+// packet_field_ip.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #ifndef _PACKETFIELD_IP
 #define _PACKETFIELD_IP

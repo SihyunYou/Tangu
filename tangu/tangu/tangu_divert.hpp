@@ -1,3 +1,9 @@
+﻿//
+// tangu_divert.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #include <tangu\tangu_analyzer.hpp>
 #pragma comment(lib, "WinDivert.lib")

@@ -1,4 +1,10 @@
-﻿#pragma once
+﻿//
+// net_manager_exception.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
+#pragma once
 #include <tangu\tangu_build.hpp>
 
 NAMESPACE_BEGIN(Net)

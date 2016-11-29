@@ -1,3 +1,9 @@
+﻿//
+// net_manager_ip.hpp
+// Copyright © jynis2937, all rights reserved,
+// This program is under the GNU Lesser General Public License.
+//
+
 #pragma once
 #ifndef _NETMANAGE_IP
 #define _NETMANAGE_IP
