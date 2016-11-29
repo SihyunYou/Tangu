@@ -13,6 +13,9 @@
 NAMESPACE_BEGIN(Packet)
 
 #pragma pack(push, 1)
+/*
+* @brief    packet_field section that supports TCP field.
+*/
 typedef struct _TCP_HEADER
 {
 

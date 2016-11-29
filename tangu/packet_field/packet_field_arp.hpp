@@ -12,6 +12,9 @@
 
 NAMESPACE_BEGIN(Packet)
 
+/*
+* @brief    packet_field section that supports ARP field.
+*/
 typedef struct ARP_ARCHITECT
 {
 
@@ -48,6 +51,9 @@ typedef struct ARP_ARCHITECT
 
 } ARP_ARCH, *PARP_ARCH;
 
+/*
+* @brief    A complete ARP frame field 
+*/
 typedef class TANGU_API __ARP
 {
 public:
@@ -58,9 +64,17 @@ public:
 	Net::L3ID _Rsrc;
 
 public:
+	/*
+	* @brief    Constructor
+	*          Initialize source address from local resources.
+	*/
 	__ARP::__ARP(void);
 
 public:
+	/*
+	* @brief    Get ARP packet.
+	* @param    Operation code 
+	*/
 	void __ARP::GetARP(ARP_ARCHITECT::Opcode);
 } ARP, *PARP;
 

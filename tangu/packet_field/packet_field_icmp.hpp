@@ -11,13 +11,7 @@
 #include <packet_field\packet_field_icmp.hpp>
 #include <packet_field\packet_field_ip.hpp>
 
-#include <Random>
-
 NAMESPACE_BEGIN(Packet)
-
-using _STD random_device;
-using _STD mt19937;
-using _STD uniform_int_distribution;
 
 #pragma pack(push, 1)
 typedef struct ICMP_ARCHITECTURE

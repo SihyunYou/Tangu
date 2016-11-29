@@ -12,18 +12,23 @@
 
 NAMESPACE_BEGIN(Packet)
 
+//
 // Refer to	https://en.wikipedia.org/wiki/IPv4#Protocol (Wiki)
 //				https://tools.ietf.org/html/rfc790 (RFC790)
-
+//
 // enum IPProtocol -> IPPROTO
+//
 
 #pragma pack(push, 1)
+/*
+* @brief    packet_field section that supports IPv4 field.
+*/
 typedef struct _IP_HEADER
 {
 
 #define IP_VERSION(x)			((x << 4) & 0xF0)
 #define IP_HEADER_LENGTH(x)	((x / 4) & 0x0F)
-	UCHAR IHL;
+	UINT8 IHL;
 
 	// Type of Service (Differentiated Services Field)
 	/*	Differentiated Services Codepoint */
@@ -32,10 +37,10 @@ typedef struct _IP_HEADER
 	/* Explicit Congestion Notification */
 	/* Refer to https://en.wikipedia.org/wiki/Explicit_Congestion_Notification */
 #define	ECN(x)						(x & 0x02)
-	UCHAR ServiceType;
+	UINT8 ServiceType;
 
-	USHORT TotalLength;
-	USHORT ldentification;
+	UINT16 TotalLength;
+	UINT16 ldentification;
 
 	// Fragment Identifier Field
 	/* Fragment Flags */
@@ -43,9 +48,9 @@ typedef struct _IP_HEADER
 #define DONT_FRAGMENTS(s)	(s << 1)
 #define MORE_FRAGMENTS(s)	(s)
 	/* Fragment Offset */
-	USHORT Fragmention;
+	UINT16 Fragmention;
 
-	UCHAR TTL;
+	UINT8 TTL;
 
 	enum class IPProto
 	{
@@ -83,12 +88,12 @@ typedef struct _IP_HEADER
 		WIDEBAND_MONITORING = 0x4E,
 		WIDEBAND_EXPAK = 0x4F,
 	};
-	UCHAR	 Protocol;
+	UINT8 Protocol;
 
-	USHORT Checksum;
+	UINT16 Checksum;
 
-	UINT Source;
-	UINT Destination;
+	UINT32 Source;
+	UINT32 Destination;
 
 } IP_HEADER, *PIP_HEADER;
 #pragma pack(pop)

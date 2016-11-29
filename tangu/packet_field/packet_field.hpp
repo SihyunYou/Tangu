@@ -16,14 +16,43 @@
 
 NAMESPACE_BEGIN(Packet)
 
+/*
+* @brief    The utility APIs for a packet field on each layer.
+*/
 class TANGU_API Utility
 {
 public:
+	/*
+	* @brief    Read data in the specified length with converting network packet 
+	*           order to host packet order.
+	* @param	    Packet data
+	* @param    Length
+	* @return   Packet data within the specified field
+	*/
 	unsigned __int64 static __forceinline Utility::Trace(LPCBYTE, UINT);
+	/*
+	* @brief    Append string with formatted data (printf series).
+	* @param	    STL string instance reference
+	* @param    Format string for variadic arguments
+	* @param    a value which is expected to be used to replace a format 
+	*           specifier in the format string. 
+	*/
 	void static Utility::CustomPermutate(string&, LPCSTR, ...);
 
+	/*
+	* @param	    Tangu-defined IPv4 header pointer
+	* @return   Check sum of IPv4 header.
+	*/
 	unsigned __int16 static Utility::IPCheckSum(PIP_HEADER);
+	/*
+	* @param	    Tangu-defined ICMP header pointer
+	* @return   Check sum of ICMP header.
+	*/
 	unsigned __int16 static Utility::ICMPCheckSum(PICMP_ARCH);
+	/*
+	* @param	    Tangu-defined TCP header pointer
+	* @return   Check sum of TCP header.
+	*/
 	unsigned __int16 static Utility::TCPCheckSum(PIP_HEADER, PTCP_HEADER);
 };
 
@@ -52,12 +81,20 @@ class TANGU_API Utility
 	((x & 0x00000000000000FF) << (CHAR_BIT * 7))
 
 public:
+	/*
+	* @brief    Convert host packet order to network packet order in Ethernet header.  
+	* @param	    Tangu-defined Ethernet header.
+	*/
 	void static Utility::ReorderEthernetHeader(ETHERNET_HEADER& _EthHdr)
 	{
 		_EthHdr.Destination = hton48(_EthHdr.Destination);
 		_EthHdr.Source = hton48(_EthHdr.Source);
 		_EthHdr.Type = hton16(_EthHdr.Type);
 	}
+	/*
+	* @brief    Convert host packet order to network packet order in ARP structure.
+	* @param	    Tangu-defined ARP structure.
+	*/
 	void static Utility::ReorderARPArch(ARP_ARCHITECT& _ARPArch)
 	{
 		_ARPArch.HardwareType = hton16(_ARPArch.HardwareType);
@@ -78,5 +115,7 @@ typedef Packet::Hton::Utility HtonUtil;
 #define SIZ_ETHERNET sizeof(ETHERNET_HEADER)
 #define SIZ_ARP SIZ_ETHERNET + sizeof(ARP_ARCH)
 #define SIZ_IP SIZ_ETHERNET + sizeof(IP_HEADER)
+#define SIZ_ICMP SIZ_IP + sizeof(ICMP_ARCH)
+#define SIZ_TCP SIZ_IP + sizeof(TCP_HEADER)
 
 #endif /* _PACKETFIELD_H */
