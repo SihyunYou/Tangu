@@ -148,6 +148,9 @@ typedef const unsigned char* LPCBYTE;
 
 /******************************************************************************************************************/
 
+#define In
+#define Out
+
 //
 // Address length on link layer (physical, internet)
 //

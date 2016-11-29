@@ -23,16 +23,12 @@ namespace Net /* net_manager_exception.hpp # class NetException */
 		switch (Errno)
 		{
 		case NET_ERROR::ERROR_INTEGER_OVERFLOW:
-		{
 			Exception = new ErrorIntegerOverflowException();
-		}
-		esac
+			break;
 
 		case NET_ERROR::ERROR_INVALID_SUBNET_MASK:
-		{
 			Exception = new ErrorInvalidSubnetMaskException();
-		}
-		esac
+			break;
 
 		default:
 			Exception = new NetException(Errno);
@@ -156,7 +152,7 @@ namespace Net /* net_manager.hpp # class IPNetTableInfo */
 		IsRowCorrespond(false),
 		Type { "", "", "Dynamic", "Static" }
 	{
-		while (ERROR_INSUFFICIENT_BUFFER == (Status = GetIpNetTable((MIB_IPNETTABLE*)IpNetTable,
+		while (ERROR_INSUFFICIENT_BUFFER == (Status = GetIpNetTable((PMIB_IPNETTABLE)IpNetTable,
 			&SizeOfPointer,
 			TRUE)))
 		{
@@ -286,7 +282,7 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 	{
 		IPInfoZeroInit();
 	}
-	IPInfo::IPInfo(const LPBYTE byteIP)
+	IPInfo::IPInfo(LPCBYTE byteIP)
 	{
 		if (nullptr != byteIP)
 		{
@@ -403,7 +399,7 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 		stringIP = Address;
 	}
 
-	BYTE IPInfo::operator[](SIZE_T Octet)
+	BYTE& IPInfo::operator[](SIZE_T Octet)
 	{
 		if (Octet > SIZ_PROTOCOL || Octet < 1)
 		{
@@ -456,7 +452,7 @@ namespace Net /* net_manager_ip.hpp # class IPInfo */
 		}
 		return true;
 	}
-	bool IPInfo::IsValidSubnetAddress(IPInfo& SubnetIPAddress)
+	bool IPInfo::IsValidSubnetMask(IPInfo& SubnetIPAddress)
 	{
 		if (SubnetIPAddress._bAddr[SIZ_PROTOCOL - 1] == 0xFF)
 		{
@@ -621,7 +617,7 @@ namespace Net /* net_manager_link.hpp # class MACInfo */
 		this->_sAddr = Address;
 	}
 
-	BYTE MACInfo::operator[](SIZE_T Octet)
+	BYTE& MACInfo::operator[](SIZE_T Octet)
 	{
 		if (Octet >= SIZ_HARDWARE || Octet < 0)
 		{

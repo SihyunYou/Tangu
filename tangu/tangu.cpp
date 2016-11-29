@@ -563,88 +563,68 @@ Win32Exception::Win32Exception(DWORD Errno) :
  Win32Exception::~Win32Exception(void)
 {
 }
-std::exception_ptr Win32Exception::FromLastError(void) noexcept
-{
-	return FromWinError(::GetLastError());
-}
-std::exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept
+exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept
 {
 	Win32Exception* Exception;
 	switch (Errno)
 	{
 	case ERROR_SUCCESS:
-	{
 		Exception = new ErrorSuccessException();
-	}
-	esac
+		break;
 
 	case ERROR_INVALID_FUNCTION:
-	{
 		Exception = new ErrorInvalidFunctionException();
-	}
-	esac
+		break;
 
 	case ERROR_FILE_NOT_FOUND:
-	{
 		Exception = new ErrorFileNotFoundException();
-	}
-	esac
+		break;
 
 	case ERROR_PATH_NOT_FOUND:
-	{
 		Exception = new ErrorPathNotFoundException();
-	}
-	esac
+		break;
 
 	case ERROR_ACCESS_DENIED:
-	{
 		Exception = new ErrorAccessDeniedException();
-	}
-	esac
+		break;
 
 	case ERROR_INVALID_HANDLE:
-	{
 		Exception = new ErrorInvalidHandleException();
-	}
-	esac
+		break;
 
 	case ERROR_READ_FAULT:
-	{
 		Exception = new ErrorReadFaultException();
-	}
-	esac
+		break;
 
 	case ERROR_WRITE_FAULT:
-	{
 		Exception = new ErrorWriteFaultException();
-	}
-	esac
+		break;
 
 	case ERROR_INVALID_PARAMETER:
-	{
 		Exception = new ErrorInvalidParameterException();
-	}
-	esac
+		break;
 
 	case ERROR_ALREADY_EXISTS:
-	{
 		Exception = new ErrorAlreadyExistsException();
-	}
-	esac
+		break;
 
 	default:
-		Exception = new Win32Exception(Errno);
+		return std::make_exception_ptr(new Win32Exception(Errno));
 	}
 
 	return std::make_exception_ptr(Exception);
 }
+exception_ptr Win32Exception::FromLastError(void) noexcept
+{
+	return FromWinError(::GetLastError());
+}
 void _declspec(noreturn) Win32Exception::Throw(DWORD WinErrno)
 {
-	std::rethrow_exception(FromWinError(WinErrno));
+	std::rethrow_exception(Win32Exception::FromWinError(WinErrno));
 }
 void _declspec(noreturn) Win32Exception::ThrowFromLastError(void)
 {
-	Throw(::GetLastError());
+	std::rethrow_exception(Win32Exception::FromLastError());
 }
 DWORD Win32Exception::get(void) const
 {
