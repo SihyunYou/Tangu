@@ -16,7 +16,7 @@ NAMESPACE_BEGIN(Packet)
 #define _MAX_ETHERNETLEN	1514
 #pragma pack(push, 1)
 /*
-* @brief    packet_field section that supports Ethernet field.
+* @brief    packet_field section that supports Ethernet field
 */
 typedef struct _ETHERNET_HEADER
 {

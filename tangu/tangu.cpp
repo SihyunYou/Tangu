@@ -28,7 +28,7 @@ PACKET_INFO::PACKET_INFO(void) :
 	PacketData(nullptr)
 {
 }
-PACKET_INFO::PACKET_INFO(LPCBYTE _PacketData) : 
+PACKET_INFO::PACKET_INFO(LPCBYTE _PacketData) :
 	PacketData(_PacketData)
 {
 }
@@ -66,7 +66,7 @@ L2:	/* TCP/IP PktBegin 2 : Data Link PktBegin { Ethernet } */
 		ARPFrame.MACLen = PktUtil::Trace(PacketData + 4, 1);
 		ARPFrame.IPLen = PktUtil::Trace(PacketData + 5, 1);
 		ARPFrame.Operation = PktUtil::Trace(PacketData + 6, 2);
-		
+
 		ARPFrame.SenderMAC = PktUtil::Trace(PacketData + 8, SIZ_HARDWARE);
 		ARPFrame.SenderIP = PktUtil::Trace(PacketData + 14, SIZ_PROTOCOL);
 		ARPFrame.TargetMAC = PktUtil::Trace(PacketData + 18, SIZ_HARDWARE);
@@ -162,7 +162,7 @@ void ARPSpoof::Reply(void)
 	ARPFrame._Rsrc.ISrc = Gateway.second;
 	GenerateARP(Packet::ARP_ARCH::Opcode::REPLY);
 }
-void ARPSpoof::Relay()
+void ARPSpoof::Relay(void)
 {
 	BYTE Msg[1500];
 	PACKET_INFO CommonPacketHole(PacketData);
@@ -181,15 +181,15 @@ void ARPSpoof::Relay()
 			if (Net::MACInfo(CommonPacketHole.EthernetHeader.Destination) == ARPFrame._Rsrc.MSrc)
 			{
 				memcpy(Msg, PacketData, PacketHeader->len);
-				memcpy(Msg, (LPCBYTE) Gateway.first, SIZ_HARDWARE);
-				memcpy(Msg + 6, (LPCBYTE) ARPFrame._Rsrc.MSrc, SIZ_HARDWARE);
+				memcpy(Msg, (LPCBYTE)Gateway.first, SIZ_HARDWARE);
+				memcpy(Msg + 6, (LPCBYTE)ARPFrame._Rsrc.MSrc, SIZ_HARDWARE);
 
 				pcap_sendpacket(Interface, Msg, PacketHeader->len);
 			}
 		}
 	} while (Ret >= 0);
 }
-bool ARPSpoof::IsARPValid()
+bool ARPSpoof::IsARPValid(void)
 {
 	return SuccessReceived;
 }
@@ -200,11 +200,128 @@ void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode Operation)
 		ARPFrame._Msg,
 		sizeof(Packet::ETHERNET_HEADER) + sizeof(Packet::ARP_ARCH));
 }
+Net::MACInfo ARPSpoof::GetMACAddress(Net::IPInfo& TargetSpoof, double TimeLimit)
+{
+	GenerateARP(Packet::ARP_ARCH::Opcode::REQUEST);
 
+	PACKET_INFO ARPReplyHole;
+	time_point<system_clock> Start{ system_clock::now() };
+
+	do
+	{
+		Ret = pcap_next_ex(Interface, &PacketHeader, (const UCHAR**)&PacketData);
+		if (0 == Ret)
+		{
+			continue;
+		}
+
+		ARPReplyHole.ParseData(PKTBEGIN::LAYER_DATALINK);
+		if (UCast(16)(Packet::ETHERNET_HEADER::EthernetType::ARP)
+			== ARPReplyHole.EthernetHeader.Type)
+		{
+			if (static_cast<USHORT>(Packet::ARP_ARCH::Opcode::REPLY) !=
+				ARPReplyHole.ARPFrame.Operation)
+			{
+				continue;
+			}
+			if (Net::IPInfo{ ARPReplyHole.ARPFrame.SenderIP } == TargetSpoof)
+			{
+				SuccessReceived = true;
+				break;
+			}
+		}
+
+		if (duration<double>(system_clock::now() - Start).count() > TimeLimit)
+		{
+			SuccessReceived = false;
+			break;
+		}
+	} while (Ret >= 0);
+
+	return ARPReplyHole.EthernetHeader.Source;
+}
 
 
 //
 // tangu.cpp : implementation of the BADURL_LIST class.
+LPCSTR HIJACK::BlockData = 
+"HTTP/1.1 200 OK\r\n"
+"Connection: close\r\n"
+"Content-Type: text/html\r\n"
+"\r\n"
+"<!doctype html>\n"
+"<html>\n"
+"\t<head>\n"
+"\t\t<title>BLOCKED!</title>\n"
+"\t</head>\n"
+"\t<body>\n"
+"\t\t<h1>BLOCKED!</h1>\n"
+"\t\t<hr>\n"
+"\t\t<p>This URL has been blocked!</p>\n"
+"\t</body>\n"
+"</html>\n";
+HIJACK::HIJACK(PACKET_INFO& _PacketInfoRef) :
+	HijackPtr(new PACKET_INFO[3],
+		std::default_delete<PACKET_INFO[]>()),
+	PacketInfoRef(_PacketInfoRef)
+{
+	PacketInfoPtr = HijackPtr.get();
+
+	//
+	// PacketInfoPtr[0] : Reset 
+	// PacketInfoPtr[1] : Block
+	// PacketInfoPtr[2] : Finish
+	//
+	for (auto i = 0; i != 3; ++i)
+	{
+		PacketInfoPtr[i] = _PacketInfoRef;
+	}
+}
+void HIJACK::Reset(void)
+{
+	PacketInfoPtr[0].TCPHeader.FHL = 0;
+	PacketInfoPtr[0].TCPHeader.FHL |= TCP_FLAGS_RST;
+	PacketInfoPtr[0].TCPHeader.FHL |= TCP_FLAGS_ACK;
+	PacketInfoPtr[0].TCPHeader.Checksum =
+		PktUtil::TCPCheckSum(&PacketInfoPtr[0].IPHeader, &PacketInfoPtr[0].TCPHeader);
+}
+void HIJACK::Block(void)
+{
+	PacketInfoPtr[1].IPHeader.TotalLength = htons(sizeof(IP_HEADER) + sizeof(TCP_HEADER) + sizeof(BlockData) - 1);
+	PacketInfoPtr[1].IPHeader.Source = PacketInfoRef.IPHeader.Destination;
+	PacketInfoPtr[1].IPHeader.Destination = PacketInfoRef.IPHeader.Source;
+	PacketInfoPtr[1].IPHeader.Checksum =
+		PktUtil::IPCheckSum(&PacketInfoPtr[1].IPHeader);
+
+	PacketInfoPtr[1].TCPHeader.FHL = 0;
+	PacketInfoPtr[1].TCPHeader.FHL |= TCP_FLAGS_PSH;
+	PacketInfoPtr[1].TCPHeader.FHL |= TCP_FLAGS_ACK;
+	PacketInfoPtr[1].TCPHeader.SrcPort = htons(80);
+	PacketInfoPtr[1].TCPHeader.DstPort = PacketInfoRef.TCPHeader.SrcPort;
+	PacketInfoPtr[1].TCPHeader.Sequence = PacketInfoRef.TCPHeader.Acknowledgemnet;
+	PacketInfoPtr[1].TCPHeader.Acknowledgemnet =
+		htonl(ntohl(PacketInfoRef.TCPHeader.Sequence) + PacketInfoRef.PayloadLength);
+	PacketInfoPtr[1].TCPHeader.Checksum =
+		PktUtil::TCPCheckSum(&PacketInfoPtr[1].IPHeader, &PacketInfoPtr[1].TCPHeader);
+}
+void HIJACK::Finish(void)
+{
+	PacketInfoPtr[2].IPHeader.Source = PacketInfoRef.IPHeader.Destination;
+	PacketInfoPtr[2].IPHeader.Destination = PacketInfoRef.IPHeader.Source;
+	PacketInfoPtr[2].IPHeader.Checksum = PktUtil::IPCheckSum(&PacketInfoPtr[2].IPHeader);
+
+	PacketInfoPtr[2].TCPHeader.FHL = 0;
+	PacketInfoPtr[2].TCPHeader.FHL |= TCP_FLAGS_FIN;
+	PacketInfoPtr[2].TCPHeader.FHL |= TCP_FLAGS_ACK;
+	PacketInfoPtr[2].TCPHeader.SrcPort = htons(80);
+	PacketInfoPtr[2].TCPHeader.DstPort = PacketInfoRef.TCPHeader.SrcPort;
+	PacketInfoPtr[2].TCPHeader.Sequence
+		= htonl(ntohl(PacketInfoRef.TCPHeader.Acknowledgemnet) + sizeof(BlockData) - 1);
+	PacketInfoPtr[2].TCPHeader.Acknowledgemnet
+		= htonl(ntohl(PacketInfoRef.TCPHeader.Sequence) + PacketInfoRef.PayloadLength);
+	PacketInfoPtr[2].TCPHeader.Checksum
+		= PktUtil::TCPCheckSum(&PacketInfoPtr[2].IPHeader, &PacketInfoPtr[2].TCPHeader);
+}
 
 _BADURL_LIST::_BADURL_LIST(HANDLE _Device) :
 	WinDivertDev(_Device)
@@ -237,13 +354,14 @@ void _BADURL_LIST::Push(const string& _Url)
 {
 	BlackListIter = BlackList.insert_after(BlackListIter, _Url);
 }
-auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
+auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(_BADURL_LIST::IsValidHost)
 {
 	unordered_map<string, string> HTTPParsedInfo;
 	std::istringstream Resp{ HTTPPayload };
 	string Token;
 	string::size_type Index;
 
+	IsValidHost = true;
 	while (std::getline(Resp, Token))
 	{
 		Index = Token.find(':', 0);
@@ -261,13 +379,13 @@ auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
 			{
 				if (Key.second.find(Lock) != string::npos)
 				{
-					return false;
+					IsValidHost = false;
 				}
 			}
 		}
 	}
 
-	return true;
+	return IsValidHost;
 }
 
 
@@ -275,9 +393,29 @@ auto _BADURL_LIST::Match(LPCSTR HTTPPayload) -> decltype(true)
 //
 // tangu.cpp : implementation of the PacketGrouper class.
 
+_TIME_POINT::_TIME_POINT(void) :
+	Start(system_clock::now())
+{
+}
 long long _TIME_POINT::operator()(void)
 {
+	End = system_clock::now();
 	return duration_cast<milliseconds>(End - Start).count();
+}
+ctimepoint::ctimepoint(void)
+{
+	time(&RawTime);
+}
+void ctimepoint::now(void)
+{
+	Errno = localtime_s(&TimeInfo, &RawTime);
+	RawTime = mktime(&TimeInfo);
+	TimePoint = system_clock::from_time_t(RawTime);
+}
+LPCSTR ctimepoint::operator()()
+{
+	strftime(TimeBuf, sizeof(TimeBuf), "%d-%m-%Y %H-%M-%S", &TimeInfo);
+	return TimeBuf;
 }
 
 PacketGrouper::PacketGrouper(PPCAP* Interface, Net::IPInfo Target) :
@@ -417,11 +555,11 @@ void PCAP_DEVICE::OpenLive(LPSTR DeviceName)
 //
 // tangu.cpp : implementation of the WINDIVERT_DEVICE class.
 
-WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
+WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR Filter) :
 	ReadPacketLength(0),
 	WrittenPacketLength(0)
 {
-	DivertDevice = WinDivertOpen(_Filter,
+	DivertDevice = WinDivertOpen(Filter,
 		WINDIVERT_LAYER::WINDIVERT_LAYER_NETWORK,
 		0,
 		0);
@@ -433,8 +571,8 @@ WINDIVERT_DEVICE::WINDIVERT_DEVICE(LPCSTR _Filter) :
 		ThrowExcpetions(Errno);
 	}
 }
-WINDIVERT_DEVICE::WINDIVERT_DEVICE(HANDLE _Device) :
-	DivertDevice(_Device)
+WINDIVERT_DEVICE::WINDIVERT_DEVICE(HANDLE Device) :
+	DivertDevice(Device)
 {
 }
 WINDIVERT_DEVICE::~WINDIVERT_DEVICE(void)
@@ -540,7 +678,7 @@ void WINDIVERT_DEVICE::Send(void)
 void WINDIVERT_DEVICE::Send(LPCBYTE _Payload, UINT _Length)
 {
 	BOOL SendSuccess = WinDivertSend(DivertDevice,
-		(PVOID) _Payload,
+		(PVOID)_Payload,
 		_Length,
 		&Address,
 		&WrittenPacketLength);
@@ -560,7 +698,7 @@ Win32Exception::Win32Exception(DWORD Errno) :
 	_ErrorCode(Errno)
 {
 }
- Win32Exception::~Win32Exception(void)
+Win32Exception::~Win32Exception(void)
 {
 }
 exception_ptr Win32Exception::FromWinError(DWORD Errno) noexcept

@@ -94,6 +94,52 @@ using _STD istringstream;
 #include <CTime>
 #include <Chrono>
 using namespace _STD chrono;
+using _STD chrono::system_clock;
+
+/*
+* @brief    Timer
+*/
+typedef struct TANGU_API _TIME_POINT
+{
+	time_point<system_clock> Start;
+	time_point<system_clock> End;
+
+	/*
+	* @brief    Initialize start time.
+	*/
+	_TIME_POINT::_TIME_POINT(void);
+	/*
+	* @return   Passed time from construction to present
+	*/
+	long long _TIME_POINT::operator()(void);
+} TIME_POINT, *PTIME_POINT;
+
+
+#define STRFTIME_LENGTH 0x00000040
+/*
+* @brief    Timer for C
+*/
+struct ctimepoint
+{
+
+private:
+	time_t RawTime;
+	tm TimeInfo;
+	errno_t Errno;
+	CHAR TimeBuf[STRFTIME_LENGTH];
+	system_clock::time_point TimePoint;
+
+public:
+	ctimepoint::ctimepoint(void);
+
+public:
+	void ctimepoint::now(void);
+	LPCSTR ctimepoint::operator()();
+	operator system_clock::time_point(void)
+	{
+		return TimePoint;
+	}
+};
 
 //
 // Random number generation facilities.
@@ -185,6 +231,7 @@ typedef const unsigned char* LPCBYTE;
 
 #define In
 #define Out
+#define InOut
 
 //
 // Address length on link layer (physical, internet)

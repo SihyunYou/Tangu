@@ -10,6 +10,12 @@
 
 #include <tangu\tangu_analyzer.hpp>
 
+/*
+* @brief    ARP spoofer
+*           ARP spoofing, ARP cache poisoning, or ARP poison routing, is 
+*           a technique by which an attacker sends (spoofed) Address 
+*           Resolution Protocol (ARP) messages onto a local area network.
+*/
 class TANGU_API ARPSpoof : protected PCAPTOOL
 {
 public:
@@ -19,52 +25,35 @@ public:
 	INT Ret;
 
 public:
+	/*
+	* @brief    Constructor
+	*          Initializes Pcap interface.
+	*          Initialize source address and destination address.
+	* @param    Pcap interface
+	* @param    Target IP
+	*/
 	ARPSpoof::ARPSpoof(PPCAP*, Net::IPInfo);
 
 protected:
+	/*
+	* @brief    Generates the ARP request or reply packet.
+	* @param    ARP operation code
+	*/
 	void ARPSpoof::GenerateARP(Packet::ARP_ARCH::Opcode);
-	Net::MACInfo ARPSpoof::GetMACAddress(Net::IPInfo& TargetSpoof, double TimeLimit)
-	{
-		GenerateARP(Packet::ARP_ARCH::Opcode::REQUEST);
-
-		PACKET_INFO ARPReplyHole;
-		time_point<system_clock> Start{ system_clock::now() };
-		
-		do
-		{
-			Ret = pcap_next_ex(Interface, &PacketHeader, (const UCHAR**)&PacketData);
-			if (0 == Ret)
-			{
-				continue;
-			}
-
-			ARPReplyHole.ParseData(PKTBEGIN::LAYER_DATALINK);
-			if (UCast(16)(Packet::ETHERNET_HEADER::EthernetType::ARP)
-				== ARPReplyHole.EthernetHeader.Type)
-			{
-				if (static_cast<USHORT>(Packet::ARP_ARCH::Opcode::REPLY) !=
-					ARPReplyHole.ARPFrame.Operation)
-				{
-					continue;
-				}
-				if (Net::IPInfo{ ARPReplyHole.ARPFrame.SenderIP } == TargetSpoof)
-				{
-					SuccessReceived = true;
-					break;
-				}
-			}
-
-			if (duration<double>(system_clock::now() - Start).count() > TimeLimit)
-			{
-				SuccessReceived = false;
-				break;
-			}
-		} while (Ret >= 0);
-
-		return ARPReplyHole.EthernetHeader.Source;
-	}
+	/*
+	* @brief    Gets other host's MAC address in local area network. 
+	* @param    Target IP
+	* @param    Time limit
+	* @return   Target MAC
+	* @deprecated    Will be divided into another class.
+	*/
+	Net::MACInfo ARPSpoof::GetMACAddress(Net::IPInfo&, double);
 
 public:
+	/*
+	* @brief    Generates the ARP reply packet for poisioning table.
+	*           Fake your IP address to gateway IP address. 
+	*/
 	void ARPSpoof::Reply(void);
 	void ARPSpoof::Relay(void);
 	bool ARPSpoof::IsARPValid(void);

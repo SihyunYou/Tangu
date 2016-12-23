@@ -128,7 +128,6 @@ private:
 	
 public:
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   IPv4 address byte array.
 	*/
 	operator IPInfo::LPCBYTE() const
@@ -136,7 +135,6 @@ public:
 		return (LPCBYTE) this->_bAddr;
 	}
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   IPv4 address string.
 	*/
 	operator IPInfo::LPCSTR() const
@@ -144,7 +142,6 @@ public:
 		return (LPCSTR) this->_sAddr.c_str();
 	}
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   IPv4 address integer.
 	*/
 	operator IPInfo::UINT() const
@@ -154,13 +151,11 @@ public:
 
 public:
 	/*
-	* @brief    Subscript operator overloading.
 	* @param     An index of array.
 	* @return   IPv4 address byte array index reference.
 	*/
 	BYTE& IPInfo::operator[](SIZE_T);
 	/*
-	* @brief    Relational operator overloading.
 	* @param     The IPInfo instance reference.
 	* @return   IPInfo instance being equal, true. Or not, false.
 	*/

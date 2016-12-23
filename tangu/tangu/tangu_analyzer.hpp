@@ -12,6 +12,9 @@
 #include <packet_field\packet_field.hpp>
 #include <tangu\tangu_interface.hpp>
 
+/*
+* @brief    An indicator where TCP/IP stack begins.
+*/
 enum class PKTBEGIN
 {
 	LAYER_DATALINK,
@@ -20,6 +23,10 @@ enum class PKTBEGIN
 	LAYER_APPLICATION
 };
 
+/*
+* @brief    Required elements for parameters sending/receiving packet through Pcap
+*           interface.
+*/
 typedef struct TANGU_API _PCAPTOOL
 {
 protected:
@@ -28,10 +35,20 @@ protected:
 	const LPBYTE PacketData;
 
 protected:
+	/*
+	* @brief    Constructor
+	*/
 	_PCAPTOOL::_PCAPTOOL(void);
+	/*
+	* @brief    Constructor
+	* @param	    Pcap interface pointer
+	*/
 	explicit _PCAPTOOL::_PCAPTOOL(PPCAP);
 } PCAPTOOL, *PPCAPTOOL;
 
+/*
+* @brief    A huge container all fields of packet can be in
+*/
 typedef class TANGU_API PACKET_INFO
 {
 public:
@@ -63,10 +80,21 @@ public:
 	UINT PayloadLength;
 
 public:
+	/*
+	* @brief    Constructor
+	*/
 	PACKET_INFO::PACKET_INFO(void);
+	/*
+	* @brief    Constructor
+	* @param	    Packet data
+	*/
 	PACKET_INFO::PACKET_INFO(LPCBYTE);
 
 public:
+	/*
+	* @brief    Parse packet data to each field structure.
+	* @param	    An indicator where TCP/IP stack begins.
+	*/
 	void PACKET_INFO::ParseData(PKTBEGIN = PKTBEGIN::LAYER_DATALINK);
 } *PPACKET_INFO;
 

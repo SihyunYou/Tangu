@@ -111,7 +111,6 @@ private:
 
 public:
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   Physical address byte array.
 	*/
 	operator MACInfo::LPCBYTE() const
@@ -119,7 +118,6 @@ public:
 		return (LPCBYTE) this->_bAddr;
 	}
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   Physical address string.
 	*/
 	operator MACInfo::LPCSTR() const
@@ -127,7 +125,6 @@ public:
 		return (LPCSTR) this->_sAddr.c_str();
 	}
 	/*
-	* @brief    Type cast operator overloading.
 	* @return   Physical address integer.
 	*/
 	operator MACInfo::UINT64() const
@@ -137,13 +134,11 @@ public:
 
 public:
 	/*
-	* @brief    Subscript operator overloading.
 	* @param     An index of array.
 	* @return   Physical address byte array index reference.
 	*/
 	BYTE& MACInfo::operator[](SIZE_T);
 	/*
-	* @brief    Relational operator overloading.
 	* @param     The MACInfo instance reference.
 	* @return   MACInfo instance being equal, true. Or not, false.
 	*/

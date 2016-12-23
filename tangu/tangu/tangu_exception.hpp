@@ -29,11 +29,11 @@ public:
 public:
 	/*
 	* @param	    winerror
-	* @return   The supplied error instance as an exception_ptr.
+	* @return   The supplied error instance as an exception_ptr
 	*/
 	exception_ptr static Win32Exception::FromWinError(DWORD) noexcept;
 	/*
-	* @return   The last error instance as an exception_ptr.
+	* @return   The last error instance as an exception_ptr
 	* @see      ::GetLastError()
 	*/
 	exception_ptr static Win32Exception::FromLastError(void) noexcept;
@@ -62,7 +62,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_SUCCESS.
+* @brief    Exception for signaling ERROR_SUCCESS
 */ 
 class ErrorSuccessException : public Win32Exception
 {
@@ -74,7 +74,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_INVALID_FUNCTION.
+* @brief    Exception for signaling ERROR_INVALID_FUNCTION
 */
 class ErrorInvalidFunctionException : public Win32Exception
 {
@@ -86,7 +86,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_FILE_NOT_FOUND.
+* @brief    Exception for signaling ERROR_FILE_NOT_FOUND
 */
 class ErrorFileNotFoundException : public Win32Exception
 {
@@ -98,7 +98,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_PATH_NOT_FOUND.
+* @brief    Exception for signaling ERROR_PATH_NOT_FOUND
 */
 class ErrorPathNotFoundException : public Win32Exception
 {
@@ -110,7 +110,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_TOO_MANY_OPEN_FILES.
+* @brief    Exception for signaling ERROR_TOO_MANY_OPEN_FILES
 */
 class ErrorTooManyOpenFilesException : public Win32Exception
 {
@@ -122,7 +122,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_ACCESS_DENIED.
+* @brief    Exception for signaling ERROR_ACCESS_DENIED
 */
 class ErrorAccessDeniedException : public Win32Exception
 {
@@ -134,7 +134,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_INVALID_HANDLE.
+* @brief    Exception for signaling ERROR_INVALID_HANDLE
 */
 class ErrorInvalidHandleException : public Win32Exception
 {
@@ -146,7 +146,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_INVALID_ACCESS.
+* @brief    Exception for signaling ERROR_INVALID_ACCESS
 */
 class ErrorInvalidAccessException : public Win32Exception
 {
@@ -158,7 +158,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_WRITE_FAULT.
+* @brief    Exception for signaling ERROR_WRITE_FAULT
 */
 class ErrorWriteFaultException : public Win32Exception
 {
@@ -170,7 +170,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_READ_FAULT.
+* @brief    Exception for signaling ERROR_READ_FAULT
 */
 class ErrorReadFaultException : public Win32Exception
 {
@@ -182,7 +182,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_INVALID_PARAMETER.
+* @brief    Exception for signaling ERROR_INVALID_PARAMETER
 */
 class ErrorInvalidParameterException : public Win32Exception
 {
@@ -194,7 +194,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_OPEN_FAILED.
+* @brief    Exception for signaling ERROR_OPEN_FAILED
 */
 class ErrorOpenFailedException : public Win32Exception
 {
@@ -206,7 +206,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_PROC_NOT_FOUND.
+* @brief    Exception for signaling ERROR_PROC_NOT_FOUND
 */
 class ErrorProcNotFoundException : public Win32Exception
 {
@@ -218,7 +218,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_ALREADY_EXISTS.
+* @brief    Exception for signaling ERROR_ALREADY_EXISTS
 */
 class ErrorAlreadyExistsException : public Win32Exception
 {
@@ -230,7 +230,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_MOD_NOT_FOUND.
+* @brief    Exception for signaling ERROR_MOD_NOT_FOUND
 */
 class ErrorModuleNotFoundException : public Win32Exception
 {
@@ -242,7 +242,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_INVALID_IMAGE_HASH.
+* @brief    Exception for signaling ERROR_INVALID_IMAGE_HASH
 */
 class ErrorInvalidImageHashException : public Win32Exception
 {
@@ -254,7 +254,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_DATA_NOT_ACCEPTED.
+* @brief    Exception for signaling ERROR_DATA_NOT_ACCEPTED
 */
 class ErrorDataNotAcceptedException : public Win32Exception
 {
@@ -266,7 +266,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_RETRY.
+* @brief    Exception for signaling ERROR_RETRY
 */
 class ErrorRetryException : public Win32Exception
 {
@@ -278,7 +278,7 @@ public:
 };
 
 /*
-* @brief    Exception for signaling ERROR_DRIVER_BLOCKED.
+* @brief    Exception for signaling ERROR_DRIVER_BLOCKED
 */
 class ErrorDriverBlockedException : public Win32Exception
 {

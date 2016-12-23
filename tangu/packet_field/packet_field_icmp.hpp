@@ -13,15 +13,24 @@
 
 NAMESPACE_BEGIN(Packet)
 
+//
+// Refer to https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages (Wiki)
+//
 #pragma pack(push, 1)
+/*
+* @brief    packet_field section that supports ICMP field.
+*/
 typedef struct ICMP_ARCHITECTURE
 {
 
+	/*
+	* @brief    Control messages
+	*/
 	enum class ICMPType
 	{
 		ICMP_ECHO_REPLY = 0,
 		ICMP_TIME_EXCEEDED = 1,
-		ICMP_DEST_UNREACH =  3,
+		ICMP_DEST_UNREACH = 3,
 		ICMP_SOURCE_QUENCH = 4,
 		ICMP_REDIRECT = 5,
 		ICMP_ECHO = 8,
@@ -34,7 +43,7 @@ typedef struct ICMP_ARCHITECTURE
 		ICMP_ADDRESSREPLY = 18,
 		NR_ICMP_TYPES = 19
 	};
-	UCHAR Type;		
+	UCHAR Type;
 	UCHAR Code;		/* Sub Type */
 	USHORT Checksum;
 
@@ -46,28 +55,45 @@ typedef struct ICMP_ARCHITECTURE
 } ICMP_ARCH, *PICMP_ARCH;
 #pragma pack(pop)
 
+
+/*
+* @brief    A complete ICMP packet field
+*/
 typedef class TANGU_API __ICMP
 {
 private:
 	random_device RdFromHW;
-	/* A Mersenne Twister pseudo-random generator of 32-bit numbers with a state size of 19937 bits. */
+	//
+	// A Mersenne Twister pseudo-random generator of 32-bit numbers with a state 
+	// size of 19937 bits. 
+	//
 	mt19937 Seed;
 	uniform_int_distribution<> Distributer;
-	
+
 public:
 	ETHERNET_HEADER EthernetHeader;
 	IP_HEADER IPHeader;
 	ICMP_ARCH	ICMPPacket;
 
-	BYTE _Msg[_MAX_ETHERNETLEN];
+	BYTE _Msg[sizeof(ETHERNET_HEADER) +
+		sizeof(IP_HEADER) +
+		sizeof(ICMP_ARCH)];
 	Net::L3ID _Rsrc;
 	USHORT Iden;
 	USHORT Seq;
 
 public:
+	/*
+	* @brief    Constructor
+	*          Initializes source address from local resources.
+	*/
 	__ICMP::__ICMP(void);
 
 public:
+	/*
+	* @brief    Gets ICMP packet.
+	* @param    ICMP Type
+	*/
 	void __ICMP::GetICMP(ICMP_ARCH::ICMPType);
 } ICMP, *PICMP;
 
